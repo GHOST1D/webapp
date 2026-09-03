@@ -9,26 +9,16 @@
 html,body{height:100%;width:100%;overflow:hidden;touch-action:none;
 font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;color:#fff;}
 
-/* ── FONDO COMPLETO = portada del álbum ── */
 #bgFull{
   position:fixed;inset:0;z-index:0;
   background:#1a0a2e center/cover no-repeat;
+  filter:brightness(.7) saturate(1.4);
   transition:background-image .8s ease;
-  filter:brightness(.75) saturate(1.3);
 }
-/* Gradiente sobre el fondo para que los controles sean legibles */
 #bgGrad{
   position:fixed;inset:0;z-index:1;
-  background:linear-gradient(
-    180deg,
-    rgba(0,0,0,.05) 0%,
-    rgba(0,0,0,.15) 40%,
-    rgba(0,0,0,.65) 70%,
-    rgba(0,0,0,.85) 100%
-  );
+  background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,0) 30%,rgba(0,0,0,.6) 65%,rgba(0,0,0,.88) 100%);
 }
-
-/* ── Contenedor principal flotando sobre el fondo ── */
 #app{
   position:relative;z-index:2;
   width:100%;max-width:440px;height:100%;
@@ -36,17 +26,9 @@ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
   padding:14px 26px 20px;justify-content:space-between;
 }
 
-/* ── Header ── */
 header{display:flex;justify-content:space-between;align-items:center;}
-.hdr-left{display:flex;align-items:center;gap:7px;}
-.redled{position:relative;width:13px;height:13px;display:flex;align-items:center;justify-content:center;}
-.redled-ping{position:absolute;inset:0;border-radius:50%;background:#ff3b30;opacity:.5;animation:ping 1.4s ease-in-out infinite;}
-.redled-dot{position:relative;width:9px;height:9px;border-radius:50%;background:#ff3b30;box-shadow:0 0 8px #ff3b30;}
-@keyframes ping{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.7);opacity:0}}
-.hdr-title{font-size:13px;font-weight:600;letter-spacing:.3px;text-shadow:0 1px 4px rgba(0,0,0,.8);}
-.hdr-badge{font-size:10px;padding:2px 9px;border-radius:99px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.8);font-family:monospace;letter-spacing:.5px;}
 
-/* ── Spacer central (deja espacio para ver la carátula de fondo) ── */
+/* ── Spacer ── */
 .spacer{flex:1;}
 
 /* ── Metadata ── */
@@ -56,24 +38,28 @@ header{display:flex;justify-content:space-between;align-items:center;}
   text-shadow:0 2px 12px rgba(0,0,0,.9);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.meta-sub{
-  display:flex;align-items:center;gap:8px;margin-top:5px;
-}
+.meta-sub{display:flex;align-items:center;gap:8px;margin-top:5px;}
 #songArtist{
   font-size:14px;font-weight:400;opacity:.75;
   text-shadow:0 1px 6px rgba(0,0,0,.8);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px;
 }
-.meta-star{font-size:20px;opacity:.6;cursor:pointer;margin-left:auto;}
+/* Estrella de favoritos */
+#starBtn{
+  background:none;border:none;cursor:pointer;
+  margin-left:auto;font-size:22px;flex-shrink:0;
+  transition:transform .2s,opacity .15s;
+  filter:drop-shadow(0 1px 4px rgba(0,0,0,.8));
+}
+#starBtn:active{transform:scale(.8);}
+#starBtn.fav{color:#ffd60a;}
 
-/* ── Times row ── */
+/* ── Barra de progreso ── */
 .times-row{
   display:flex;justify-content:space-between;
   font-size:12px;opacity:.65;font-variant-numeric:tabular-nums;
   margin-bottom:5px;text-shadow:0 1px 4px rgba(0,0,0,.9);
 }
-
-/* ── Barra de progreso ── */
 #seekBar{
   width:100%;height:4px;appearance:none;
   background:rgba(255,255,255,.3);border-radius:4px;
@@ -84,7 +70,7 @@ header{display:flex;justify-content:space-between;align-items:center;}
   background:#fff;box-shadow:0 0 6px rgba(0,0,0,.6);cursor:pointer;
 }
 
-/* ── Controles principales ── */
+/* ── Controles ── */
 .controls{
   display:flex;justify-content:space-between;align-items:center;
   margin-bottom:16px;padding:0 4px;
@@ -95,9 +81,8 @@ header{display:flex;justify-content:space-between;align-items:center;}
   display:flex;align-items:center;justify-content:center;
   transition:opacity .15s,transform .1s;padding:6px;
 }
-.ctrl-btn:active{opacity:.45;transform:scale(.85);}
-.ctrl-btn.dim{opacity:.3;pointer-events:none;}
-
+.ctrl-btn:active{opacity:.4;transform:scale(.82);}
+.ctrl-btn.dim{opacity:.25;pointer-events:none;}
 #playBtn{
   width:66px;height:66px;border-radius:50%;border:none;cursor:pointer;
   background:rgba(255,255,255,.92);
@@ -109,44 +94,39 @@ header{display:flex;justify-content:space-between;align-items:center;}
 .play-icon{width:30px;height:30px;fill:#000;}
 
 /* ── Volumen ── */
-.volume-row{
-  display:flex;align-items:center;gap:10px;margin-bottom:16px;
-}
+.volume-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
 .vol-icon{width:18px;height:18px;opacity:.55;flex-shrink:0;}
-#volBar{
-  flex:1;height:3px;appearance:none;
-  background:rgba(255,255,255,.3);border-radius:4px;
-  cursor:pointer;outline:none;
-}
-#volBar::-webkit-slider-thumb{
-  appearance:none;width:14px;height:14px;border-radius:50%;
-  background:rgba(255,255,255,.9);cursor:pointer;
-}
+#volBar{flex:1;height:3px;appearance:none;background:rgba(255,255,255,.3);border-radius:4px;cursor:pointer;outline:none;}
+#volBar::-webkit-slider-thumb{appearance:none;width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.9);cursor:pointer;}
 
 /* ── Footer ── */
-footer{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:0 8px;
-}
+footer{display:flex;justify-content:space-between;align-items:center;padding:0 8px;}
 .foot-btn{
   background:none;border:none;cursor:pointer;
-  color:rgba(255,255,255,.6);font-size:20px;
-  padding:6px;transition:color .2s,opacity .15s;
+  color:rgba(255,255,255,.6);padding:6px;
   display:flex;align-items:center;
+  transition:color .2s,opacity .15s;
 }
 .foot-btn:active{opacity:.4;}
 .foot-btn.active{color:#fff;}
 
-/* ── Panel de Letras (Shazam) ── */
-#lyricsOverlay{
-  position:fixed;inset:0;z-index:50;display:none;flex-direction:column;
-  background:rgba(0,0,0,.78);backdrop-filter:blur(22px);
+/* ════════════════════════════════════════════════════
+   PANEL LETRAS (Shazam style)
+════════════════════════════════════════════════════ */
+.overlay-panel{
+  position:fixed;inset:0;z-index:50;
+  display:none;flex-direction:column;
+  background:rgba(0,0,0,.82);backdrop-filter:blur(22px);
   padding:24px 22px 100px;
+  animation:slideUp .3s ease;
 }
-#lyricsOverlay.visible{display:flex;}
-.lyrics-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
-.lyrics-hdr-title{font-size:13px;font-weight:600;opacity:.65;letter-spacing:.5px;}
-#closeLyricsBtn{background:none;border:none;cursor:pointer;color:rgba(255,255,255,.65);font-size:22px;}
+.overlay-panel.visible{display:flex;}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.panel-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.panel-hdr-title{font-size:13px;font-weight:600;opacity:.65;letter-spacing:.5px;text-transform:uppercase;}
+.panel-close{background:none;border:none;cursor:pointer;color:rgba(255,255,255,.65);font-size:22px;}
+
+/* Letras */
 #lyricsScroll{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;}
 #lyricsScroll::-webkit-scrollbar{display:none;}
 .lyric-line{text-align:center;font-size:17px;font-weight:600;
@@ -155,6 +135,83 @@ footer{
 .lyric-line.active{color:#fff;font-size:21px;text-shadow:0 0 30px rgba(255,255,255,.6);}
 .lyric-line.past{color:rgba(255,255,255,.15);}
 .lyric-loading,.lyric-none{text-align:center;color:rgba(255,255,255,.4);font-size:14px;padding:60px 20px;line-height:2;}
+
+/* ════════════════════════════════════════════════════
+   PANEL PLAYLIST
+════════════════════════════════════════════════════ */
+#playlistPanel{
+  position:fixed;inset:0;z-index:50;
+  display:none;flex-direction:column;
+  background:rgba(0,0,0,.88);backdrop-filter:blur(22px);
+}
+#playlistPanel.visible{display:flex;}
+#plScroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+#plScroll::-webkit-scrollbar{display:none;}
+.pl-item{
+  display:flex;align-items:center;gap:14px;
+  padding:13px 26px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  cursor:pointer;transition:background .15s;
+}
+.pl-item:active{background:rgba(255,255,255,.08);}
+.pl-item.pl-active{background:rgba(255,255,255,.07);}
+.pl-num{
+  font-size:14px;font-variant-numeric:tabular-nums;
+  opacity:.35;width:20px;text-align:right;flex-shrink:0;
+}
+.pl-item.pl-active .pl-num{opacity:0;}
+.pl-play-anim{display:none;width:20px;flex-shrink:0;align-items:center;justify-content:center;}
+.pl-item.pl-active .pl-play-anim{display:flex;}
+.pl-bars{display:flex;align-items:flex-end;gap:2px;height:14px;}
+.pl-bar{width:3px;border-radius:1px;background:#38bdf8;animation:plbar 1s ease-in-out infinite alternate;}
+.pl-bar:nth-child(1){height:5px;animation-delay:0s;}
+.pl-bar:nth-child(2){height:11px;animation-delay:.2s;}
+.pl-bar:nth-child(3){height:8px;animation-delay:.4s;}
+@keyframes plbar{from{transform:scaleY(.4)}to{transform:scaleY(1)}}
+.pl-info{flex:1;overflow:hidden;}
+.pl-title{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pl-item.pl-active .pl-title{color:#38bdf8;}
+.pl-artist{font-size:12px;opacity:.55;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* ════════════════════════════════════════════════════
+   MODAL FAVORITOS
+════════════════════════════════════════════════════ */
+#favModal{
+  position:fixed;inset:0;z-index:80;
+  display:none;align-items:flex-end;justify-content:center;
+  background:rgba(0,0,0,.6);
+}
+#favModal.visible{display:flex;}
+.fav-sheet{
+  width:100%;max-width:440px;
+  background:rgba(28,28,40,.97);
+  border-radius:24px 24px 0 0;
+  padding:28px 26px 36px;
+  animation:slideUp .3s ease;
+}
+.fav-sheet h3{font-size:17px;font-weight:700;margin-bottom:6px;}
+.fav-sheet p{font-size:13px;opacity:.55;margin-bottom:18px;}
+.fav-input{
+  width:100%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
+  border-radius:12px;padding:12px 16px;color:#fff;font-size:15px;outline:none;
+}
+.fav-input::placeholder{color:rgba(255,255,255,.35);}
+.fav-input:focus{border-color:rgba(56,189,248,.6);}
+.fav-existing{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;}
+.fav-tag{
+  padding:6px 14px;border-radius:99px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
+  font-size:13px;cursor:pointer;transition:background .15s;
+}
+.fav-tag:active{background:rgba(56,189,248,.3);}
+.fav-btns{display:flex;gap:10px;margin-top:20px;}
+.fav-btn{
+  flex:1;padding:14px;border-radius:14px;border:none;
+  font-size:15px;font-weight:600;cursor:pointer;transition:opacity .15s;
+}
+.fav-btn:active{opacity:.7;}
+.fav-cancel{background:rgba(255,255,255,.12);color:#fff;}
+.fav-confirm{background:#38bdf8;color:#000;}
 </style>
 </head>
 <body>
@@ -162,58 +219,73 @@ footer{
 <div id="bgFull"></div>
 <div id="bgGrad"></div>
 
-<!-- Panel de Letras -->
-<div id="lyricsOverlay">
-  <div class="lyrics-hdr">
-    <span class="lyrics-hdr-title">🎤 LETRAS SINCRONIZADAS</span>
-    <button id="closeLyricsBtn">✕</button>
+<!-- ── PANEL LETRAS ── -->
+<div id="lyricsOverlay" class="overlay-panel">
+  <div class="panel-hdr">
+    <span class="panel-hdr-title">🎤 Letras sincronizadas</span>
+    <button class="panel-close" id="closeLyricsBtn">✕</button>
   </div>
   <div id="lyricsScroll"><div class="lyric-loading">Buscando letra...</div></div>
+</div>
+
+<!-- ── PANEL PLAYLIST ── -->
+<div id="playlistPanel">
+  <div style="padding:20px 26px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.08);">
+    <div>
+      <div style="font-size:11px;opacity:.45;letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px;">Playlist</div>
+      <div style="font-size:16px;font-weight:700;" id="plTitle">Resultados de búsqueda</div>
+    </div>
+    <button class="panel-close" id="closePlBtn">✕</button>
+  </div>
+  <div id="plScroll"></div>
+</div>
+
+<!-- ── MODAL FAVORITOS ── -->
+<div id="favModal">
+  <div class="fav-sheet">
+    <h3>⭐ Guardar en playlist</h3>
+    <p id="favSongLabel">Agrega esta canción a una playlist personal</p>
+    <input class="fav-input" id="favInput" placeholder="Nombre de la playlist..." maxlength="40">
+    <div class="fav-existing" id="favExisting"></div>
+    <div class="fav-btns">
+      <button class="fav-btn fav-cancel" id="favCancel">Cancelar</button>
+      <button class="fav-btn fav-confirm" id="favConfirm">Guardar ⭐</button>
+    </div>
+  </div>
 </div>
 
 <audio id="audioPlayer" preload="auto"></audio>
 
 <div id="app">
-  <!-- Header -->
-  <header>
-    <span style="font-size:11px;font-weight:500;opacity:.5;letter-spacing:.5px;text-shadow:0 1px 4px rgba(0,0,0,.8);">GHOST1D Player</span>
-  </header>
-
-  <!-- Espacio para ver la carátula de fondo -->
+  <!-- Spacer: la imagen de fondo llena el top -->
   <div class="spacer"></div>
 
   <!-- Metadata -->
   <div class="meta">
     <div id="songTitle">Cargando canción...</div>
     <div class="meta-sub">
-      <div id="songArtist">GHOST1D_Solutions Catalog</div>
-      <span class="meta-star">☆</span>
+      <div id="songArtist">GHOST1D_Solutions</div>
+      <button id="starBtn" title="Guardar en playlist">☆</button>
     </div>
   </div>
 
-  <!-- Tiempo + Barra de progreso -->
+  <!-- Progreso -->
   <div class="times-row">
     <span id="currentTime">0:00</span>
     <span id="durationTime">-0:00</span>
   </div>
   <input type="range" id="seekBar" value="0" max="100">
 
-  <!-- Controles iOS -->
+  <!-- Controles -->
   <div class="controls">
     <button class="ctrl-btn" id="prevBtn">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="rgba(255,255,255,.85)">
-        <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/>
-      </svg>
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="rgba(255,255,255,.85)"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
     </button>
     <button id="playBtn">
-      <svg id="playIcon" class="play-icon" viewBox="0 0 24 24">
-        <path d="M8 5v14l11-7z"/>
-      </svg>
+      <svg id="playIcon" class="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
     </button>
     <button class="ctrl-btn" id="nextBtn">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="rgba(255,255,255,.85)">
-        <path d="M6 18l8.5-6L6 6v12zm2-8.14 5.5 3.89L8 14.64v-4.78zM16 6h2v12h-2z"/>
-      </svg>
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="rgba(255,255,255,.85)"><path d="M6 18l8.5-6L6 6v12zm2-8.14 5.5 3.89L8 14.64v-4.78zM16 6h2v12h-2z"/></svg>
     </button>
   </div>
 
@@ -224,12 +296,12 @@ footer{
     <svg class="vol-icon" viewBox="0 0 24 24" fill="rgba(255,255,255,.55)"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
   </div>
 
-  <!-- Footer: letras + lista -->
+  <!-- Footer -->
   <footer>
     <button class="foot-btn" id="lyricsBtn">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 14v-2.47l6.88-6.88c.2-.2.51-.2.71 0l1.77 1.77c.2.2.2.51 0 .71L8.47 14H6zm14 0h-8.5l2-2H20v2z"/></svg>
     </button>
-    <button class="foot-btn">
+    <button class="foot-btn" id="playlistBtn">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
     </button>
   </footer>
@@ -237,218 +309,348 @@ footer{
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script>
-// Notificar a Telegram PRIMERO para evitar pantalla negra infinita
-try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch(e){}
+try {
+  Telegram.WebApp.ready();
+  Telegram.WebApp.expand();
+  // Fusiona la barra nativa de Telegram con el fondo oscuro de la portada
+  Telegram.WebApp.setHeaderColor('#000000');
+  Telegram.WebApp.setBackgroundColor('#000000');
+  // Evita cierre accidental al deslizar
+  if(Telegram.WebApp.disableVerticalSwipes) Telegram.WebApp.disableVerticalSwipes();
+} catch(e){}
 
-var audio    = document.getElementById('audioPlayer');
-var bgFull   = document.getElementById('bgFull');
-var playBtn  = document.getElementById('playBtn');
-var playIcon = document.getElementById('playIcon');
-var titleEl  = document.getElementById('songTitle');
-var artistEl = document.getElementById('songArtist');
-var seekBar  = document.getElementById('seekBar');
-var volBar   = document.getElementById('volBar');
-var currEl   = document.getElementById('currentTime');
-var durEl    = document.getElementById('durationTime');
-var prevBtn  = document.getElementById('prevBtn');
-var nextBtn  = document.getElementById('nextBtn');
-var lyricsBtn     = document.getElementById('lyricsBtn');
-var lyricsOverlay = document.getElementById('lyricsOverlay');
+// ── Elementos ──────────────────────────────────────────────────────────────
+var audio        = document.getElementById('audioPlayer');
+var bgFull       = document.getElementById('bgFull');
+var playBtn      = document.getElementById('playBtn');
+var playIcon     = document.getElementById('playIcon');
+var titleEl      = document.getElementById('songTitle');
+var artistEl     = document.getElementById('songArtist');
+var seekBar      = document.getElementById('seekBar');
+var volBar       = document.getElementById('volBar');
+var currEl       = document.getElementById('currentTime');
+var durEl        = document.getElementById('durationTime');
+var prevBtn      = document.getElementById('prevBtn');
+var nextBtn      = document.getElementById('nextBtn');
+var starBtn      = document.getElementById('starBtn');
+var lyricsBtn    = document.getElementById('lyricsBtn');
+var lyricsOverlay= document.getElementById('lyricsOverlay');
 var closeLyricsBtn= document.getElementById('closeLyricsBtn');
-var lyricsScroll  = document.getElementById('lyricsScroll');
+var lyricsScroll = document.getElementById('lyricsScroll');
+var playlistBtn  = document.getElementById('playlistBtn');
+var playlistPanel= document.getElementById('playlistPanel');
+var closePlBtn   = document.getElementById('closePlBtn');
+var plScroll     = document.getElementById('plScroll');
+var favModal     = document.getElementById('favModal');
+var favInput     = document.getElementById('favInput');
+var favConfirm   = document.getElementById('favConfirm');
+var favCancel    = document.getElementById('favCancel');
+var favExisting  = document.getElementById('favExisting');
+var favSongLabel = document.getElementById('favSongLabel');
 
-// ── Leer parámetros URL ──────────────────────────────────────────────────────
+// ── Parámetros URL ────────────────────────────────────────────────────────
 function getParam(k){
   try{
     var s=new URLSearchParams(window.location.search);
     if(s.has(k))return s.get(k);
     var h=new URLSearchParams(window.location.hash.substring(1));
     if(h.has(k))return h.get(k);
-  }catch(e){}
-  return null;
+  }catch(e){}return null;
 }
-
-var titleP      = getParam('title');
-var artistP     = getParam('artist');
-var audioP      = getParam('audio');
-var prevTitleP  = getParam('prev_title');
-var prevArtistP = getParam('prev_artist');
-var prevAudioP  = getParam('prev_audio');
-var nextTitleP  = getParam('next_title');
-var nextArtistP = getParam('next_artist');
-var nextAudioP  = getParam('next_audio');
+var titleP = getParam('title');
+var artistP= getParam('artist');
+var audioP = getParam('audio');
+var plP    = getParam('pl');
+var piP    = getParam('pi');
 
 var titleStr  = titleP  ? decodeURIComponent(titleP)  : '';
 var artistStr = artistP ? decodeURIComponent(artistP) : '';
 var audioStr  = audioP  ? decodeURIComponent(audioP)  : '';
 
+// Playlist
+var playlist    = [];
+var playlistIdx = 0;
+try{
+  if(plP){ playlist = JSON.parse(decodeURIComponent(plP)); }
+  if(piP){ playlistIdx = parseInt(piP)||0; }
+}catch(e){}
+
+// ── Mostrar info inicial ──────────────────────────────────────────────────
 if(titleStr)  titleEl.innerText  = titleStr;
 if(artistStr) artistEl.innerText = artistStr;
 
-
-// Aplicar fondo y cargar audio
-function applyTrack(title, artist, audioSrc){
-  if(title)  { titleEl.innerText  = title;  titleStr  = title; }
-  if(artist) { artistEl.innerText = artist; artistStr = artist; }
-  if(audioSrc){ audio.src = audioSrc; audio.load(); }
-  // Buscar carátula HD en iTunes y usarla de fondo completo
-  var q = (title||titleStr) + ' ' + (artist||artistStr);
-  if(!q.trim()) return;
-  fetch('https://itunes.apple.com/search?term='+encodeURIComponent(q.trim())+'&entity=song&limit=1')
-    .then(function(r){return r.json();})
-    .then(function(d){
-      if(d.results&&d.results.length>0){
-        var t=d.results[0];
-        if(!titleP)  { titleEl.innerText=t.trackName;  titleStr=t.trackName; }
-        if(!artistP) { artistEl.innerText=t.artistName; artistStr=t.artistName; }
-        if(t.artworkUrl100){
-          var img=t.artworkUrl100.replace('100x100bb','600x600bb');
-          bgFull.style.backgroundImage='url('+img+')';
-        }
-        // Usar preview si no hay audio de Telegram
-        if(!audioSrc && t.previewUrl){
-          audio.src=t.previewUrl; audio.load();
-        }
-      }
-    }).catch(function(){});
-}
-
-applyTrack(titleStr, artistStr, audioStr);
-
-// ── Utilidades ───────────────────────────────────────────────────────────────
-function fmt(s, rem){
-  if(isNaN(s)||!isFinite(s)) return rem?'-0:00':'0:00';
-  var m=Math.floor(s/60), sec=Math.floor(s%60);
+// ── Utilidades ────────────────────────────────────────────────────────────
+function fmt(s,rem){
+  if(isNaN(s)||!isFinite(s))return rem?'-0:00':'0:00';
+  var m=Math.floor(s/60),sec=Math.floor(s%60);
   return (rem?'-':'')+m+':'+(sec<10?'0':'')+sec;
 }
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function setPlaying(p){
   if(p) playIcon.innerHTML='<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
   else  playIcon.innerHTML='<path d="M8 5v14l11-7z"/>';
 }
 
-// ── Desbloqueo de audio Android ──────────────────────────────────────────────
-var unlocked=false;
-function unlock(){
-  if(unlocked)return; unlocked=true;
-  if(audio.src&&audio.paused)
-    audio.play().then(function(){setPlaying(true);}).catch(function(){});
-}
-document.addEventListener('touchstart',unlock,{once:true});
-document.addEventListener('click',     unlock,{once:true});
+// ── Cargar y aplicar pista ─────────────────────────────────────────────────
+function applyTrack(title, artist, audioSrc){
+  lyricsLoaded = false;
+  lyricsVisible = false;
+  lyricsOverlay.classList.remove('visible');
+  lyricsBtn.classList.remove('active');
+  lrcLines = []; currentLineIndex = -1;
+  starBtn.innerText = '☆'; starBtn.classList.remove('fav');
 
-audio.addEventListener('play',  function(){setPlaying(true);});
+  if(title)  { titleEl.innerText  = title;  titleStr  = title;  }
+  if(artist) { artistEl.innerText = artist; artistStr = artist; }
+
+  // Buscar carátula en iTunes
+  var q = (title||titleStr)+' '+(artist||artistStr);
+  if(q.trim()){
+    fetch('https://itunes.apple.com/search?term='+encodeURIComponent(q.trim())+'&entity=song&limit=1')
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(d.results&&d.results.length>0){
+          var t=d.results[0];
+          if(!titleP)  { titleEl.innerText=t.trackName;  titleStr=t.trackName; }
+          if(!artistP) { artistEl.innerText=t.artistName; artistStr=t.artistName; }
+          if(t.artworkUrl100){
+            var img=t.artworkUrl100.replace('100x100bb','600x600bb');
+            bgFull.style.backgroundImage='url('+img+')';
+          }
+          if(!audioSrc && t.previewUrl){ audio.src=t.previewUrl; audio.load(); }
+        }
+      }).catch(function(){});
+  }
+
+  if(audioSrc){ audio.src=audioSrc; audio.load(); }
+}
+
+// Carga inicial
+applyTrack(titleStr, artistStr, audioStr);
+
+// ── Desbloqueo Android ─────────────────────────────────────────────────────
+var unlocked=false;
+function unlock(){ if(unlocked)return;unlocked=true; if(audio.src&&audio.paused)audio.play().then(function(){setPlaying(true);}).catch(function(){}); }
+document.addEventListener('touchstart',unlock,{once:true});
+document.addEventListener('click',unlock,{once:true});
+
+audio.addEventListener('play',  function(){setPlaying(true); updatePlActive();});
 audio.addEventListener('pause', function(){setPlaying(false);});
-audio.addEventListener('ended', function(){
-  setPlaying(false); seekBar.value=0;
-  currEl.innerText='0:00'; durEl.innerText='-0:00';
-});
+audio.addEventListener('ended', function(){ setPlaying(false);seekBar.value=0;currEl.innerText='0:00';durEl.innerText='-0:00'; });
 audio.addEventListener('timeupdate',function(){
   if(audio.duration){
     seekBar.value=(audio.currentTime/audio.duration)*100;
     currEl.innerText=fmt(audio.currentTime,false);
     durEl.innerText=fmt(audio.duration-audio.currentTime,true);
-    if(lyricsVisible) updateActiveLine(audio.currentTime);
+    if(lyricsVisible)updateActiveLine(audio.currentTime);
   }
 });
-audio.addEventListener('loadedmetadata',function(){
-  durEl.innerText=fmt(audio.duration,true);
-});
-
-seekBar.addEventListener('input',function(){
-  if(audio.duration) audio.currentTime=(seekBar.value/100)*audio.duration;
-});
-
+audio.addEventListener('loadedmetadata',function(){durEl.innerText=fmt(audio.duration,true);});
+seekBar.addEventListener('input',function(){if(audio.duration)audio.currentTime=(seekBar.value/100)*audio.duration;});
 audio.volume=0.85;
 volBar.addEventListener('input',function(){audio.volume=volBar.value/100;});
 
 playBtn.addEventListener('click',function(e){
-  e.stopPropagation(); unlocked=true;
-  if(!audio.src) return;
-  if(audio.paused) audio.play().then(function(){setPlaying(true);}).catch(function(){});
-  else { audio.pause(); setPlaying(false); }
+  e.stopPropagation();unlocked=true;
+  if(!audio.src)return;
+  if(audio.paused)audio.play().then(function(){setPlaying(true);}).catch(function(){});
+  else{audio.pause();setPlaying(false);}
 });
 
-// ── Prev / Next ──────────────────────────────────────────────────────────────
-if(!prevAudioP) prevBtn.classList.add('dim');
-if(!nextAudioP) nextBtn.classList.add('dim');
+// ── Prev / Next ───────────────────────────────────────────────────────────
+function updateNavBtns(){
+  if(playlist.length===0){prevBtn.classList.add('dim');nextBtn.classList.add('dim');return;}
+  prevBtn.classList.toggle('dim', playlistIdx<=0);
+  nextBtn.classList.toggle('dim', playlistIdx>=playlist.length-1);
+}
+updateNavBtns();
 
-prevBtn.addEventListener('click',function(e){
-  e.stopPropagation(); unlocked=true;
-  if(!prevAudioP) return;
+function navTo(newIdx){
+  if(newIdx<0||newIdx>=playlist.length)return;
+  playlistIdx=newIdx;
+  var item=playlist[newIdx];
   var wasPlaying=!audio.paused;
-  lyricsLoaded=false; lyricsVisible=false;
-  lyricsOverlay.classList.remove('visible');
-  lyricsBtn.classList.remove('active');
-  applyTrack(
-    prevTitleP  ? decodeURIComponent(prevTitleP)  : '',
-    prevArtistP ? decodeURIComponent(prevArtistP) : '',
-    decodeURIComponent(prevAudioP)
-  );
-  if(wasPlaying) setTimeout(function(){
-    audio.play().then(function(){setPlaying(true);}).catch(function(){});
-  },400);
+  applyTrack(item.t, item.a, '');
+  updateNavBtns();
+  updatePlActive();
+  if(wasPlaying){
+    setTimeout(function(){
+      audio.play().then(function(){setPlaying(true);}).catch(function(){});
+    },500);
+  }
+}
+
+prevBtn.addEventListener('click',function(e){e.stopPropagation();unlocked=true;navTo(playlistIdx-1);});
+nextBtn.addEventListener('click',function(e){e.stopPropagation();unlocked=true;navTo(playlistIdx+1);});
+
+// ── Panel Playlist ────────────────────────────────────────────────────────
+function updatePlActive(){
+  document.querySelectorAll('.pl-item').forEach(function(el,i){
+    el.classList.toggle('pl-active', i===playlistIdx);
+  });
+}
+function renderPlaylist(){
+  if(!playlist.length){
+    plScroll.innerHTML='<div style="text-align:center;padding:60px 20px;opacity:.4;font-size:14px;">Sin playlist disponible</div>';
+    return;
+  }
+  var h='<div style="height:6px"></div>';
+  playlist.forEach(function(item,i){
+    var active=i===playlistIdx?'pl-active':'';
+    h+='<div class="pl-item '+active+'" data-i="'+i+'">'
+      +'<span class="pl-num">'+(i+1)+'</span>'
+      +'<span class="pl-play-anim"><span class="pl-bars"><span class="pl-bar"></span><span class="pl-bar"></span><span class="pl-bar"></span></span></span>'
+      +'<div class="pl-info">'
+        +'<div class="pl-title">'+esc(item.t)+'</div>'
+        +'<div class="pl-artist">'+esc(item.a)+'</div>'
+      +'</div>'
+    +'</div>';
+  });
+  h+='<div style="height:30px"></div>';
+  plScroll.innerHTML=h;
+  plScroll.querySelectorAll('.pl-item').forEach(function(el){
+    el.addEventListener('click',function(){
+      var i=parseInt(this.getAttribute('data-i'));
+      var wasPlaying=!audio.paused;
+      playlistIdx=i;
+      var item=playlist[i];
+      applyTrack(item.t,item.a,'');
+      updateNavBtns();
+      updatePlActive();
+      // Cerrar panel y reproducir
+      playlistPanel.classList.remove('visible');
+      playlistBtn.classList.remove('active');
+      if(wasPlaying){
+        setTimeout(function(){
+          audio.play().then(function(){setPlaying(true);}).catch(function(){});
+        },600);
+      }
+    });
+  });
+  // Scroll al item activo
+  setTimeout(function(){
+    var active=plScroll.querySelector('.pl-active');
+    if(active)active.scrollIntoView({block:'center',behavior:'smooth'});
+  },150);
+}
+
+playlistBtn.addEventListener('click',function(e){
+  e.stopPropagation();unlocked=true;
+  renderPlaylist();
+  playlistPanel.classList.add('visible');
+  playlistBtn.classList.add('active');
+});
+closePlBtn.addEventListener('click',function(e){
+  e.stopPropagation();
+  playlistPanel.classList.remove('visible');
+  playlistBtn.classList.remove('active');
 });
 
-nextBtn.addEventListener('click',function(e){
-  e.stopPropagation(); unlocked=true;
-  if(!nextAudioP) return;
-  var wasPlaying=!audio.paused;
-  lyricsLoaded=false; lyricsVisible=false;
-  lyricsOverlay.classList.remove('visible');
-  lyricsBtn.classList.remove('active');
-  applyTrack(
-    nextTitleP  ? decodeURIComponent(nextTitleP)  : '',
-    nextArtistP ? decodeURIComponent(nextArtistP) : '',
-    decodeURIComponent(nextAudioP)
-  );
-  if(wasPlaying) setTimeout(function(){
-    audio.play().then(function(){setPlaying(true);}).catch(function(){});
-  },400);
+// ── Favoritos / Estrella ──────────────────────────────────────────────────
+var savedFavPlaylists = [];
+try{
+  var stored=localStorage.getItem('ghost1d_playlists');
+  if(stored) savedFavPlaylists=JSON.parse(stored);
+}catch(e){}
+
+function openFavModal(){
+  favSongLabel.innerText='"'+(titleStr||'?')+'" — '+(artistStr||'');
+  favInput.value='';
+  // Mostrar playlists previas como tags
+  if(savedFavPlaylists.length){
+    var h='';
+    savedFavPlaylists.forEach(function(n){
+      h+='<span class="fav-tag" data-n="'+esc(n)+'">'+esc(n)+'</span>';
+    });
+    favExisting.innerHTML=h;
+    favExisting.querySelectorAll('.fav-tag').forEach(function(tag){
+      tag.addEventListener('click',function(){
+        favInput.value=this.getAttribute('data-n');
+        favInput.focus();
+      });
+    });
+  } else {
+    favExisting.innerHTML='';
+  }
+  favModal.classList.add('visible');
+  setTimeout(function(){favInput.focus();},200);
+}
+
+starBtn.addEventListener('click',function(e){
+  e.stopPropagation();unlocked=true;
+  openFavModal();
 });
 
-// ── Letras Sincronizadas ─────────────────────────────────────────────────────
-var lyricsVisible=false, lyricsLoaded=false;
-var lrcLines=[], currentLineIndex=-1;
+favCancel.addEventListener('click',function(e){
+  e.stopPropagation();
+  favModal.classList.remove('visible');
+});
 
+favConfirm.addEventListener('click',function(e){
+  e.stopPropagation();
+  var plName=(favInput.value||'').trim();
+  if(!plName){favInput.focus();favInput.style.borderColor='#ef4444';return;}
+  favInput.style.borderColor='';
+
+  // Guardar en localStorage como historial de playlists
+  if(!savedFavPlaylists.includes(plName)){
+    savedFavPlaylists.unshift(plName);
+    if(savedFavPlaylists.length>10)savedFavPlaylists.pop();
+    try{localStorage.setItem('ghost1d_playlists',JSON.stringify(savedFavPlaylists));}catch(e){}
+  }
+
+  // Marcar estrella
+  starBtn.innerText='⭐'; starBtn.classList.add('fav');
+  favModal.classList.remove('visible');
+
+  // Enviar al bot para guardar permanentemente
+  var data=JSON.stringify({
+    action:'add_to_playlist',
+    playlist: plName,
+    title:    titleStr,
+    artist:   artistStr
+  });
+  try{
+    Telegram.WebApp.sendData(data);
+  }catch(e){
+    // sendData cierra la app; si falla, al menos la estrella queda marcada
+    console.log('sendData fallback:', e);
+  }
+});
+
+// ── Letras Sincronizadas ──────────────────────────────────────────────────
+var lyricsVisible=false,lyricsLoaded=false;
+var lrcLines=[],currentLineIndex=-1;
 function parseLRC(txt){
   var lines=[],re=/\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/;
   txt.split('\n').forEach(function(l){
     var m=l.match(re);
-    if(m){
-      var s=parseInt(m[1])*60+parseInt(m[2])+parseInt(m[3])/1000;
-      var t=m[4].trim(); if(t) lines.push({time:s,text:t});
-    }
+    if(m){var s=parseInt(m[1])*60+parseInt(m[2])+parseInt(m[3])/1000;var t=m[4].trim();if(t)lines.push({time:s,text:t});}
   });
   return lines.sort(function(a,b){return a.time-b.time;});
 }
-function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function renderLyrics(){
-  if(!lrcLines.length){
-    lyricsScroll.innerHTML='<div class="lyric-none">😔 No hay letra sincronizada disponible.<br>Disfruta la música 🎵</div>'; return;
-  }
+  if(!lrcLines.length){lyricsScroll.innerHTML='<div class="lyric-none">😔 Sin letra sincronizada.<br>Disfruta la música 🎵</div>';return;}
   var h='<div style="height:50px"></div>';
   lrcLines.forEach(function(l,i){h+='<div class="lyric-line" id="ll'+i+'">'+esc(l.text)+'</div>';});
   h+='<div style="height:120px"></div>';
   lyricsScroll.innerHTML=h;
 }
 function updateActiveLine(t){
-  if(!lrcLines.length) return;
+  if(!lrcLines.length)return;
   var ni=-1;
   for(var i=0;i<lrcLines.length;i++){if(lrcLines[i].time<=t)ni=i;else break;}
-  if(ni===currentLineIndex) return;
+  if(ni===currentLineIndex)return;
   currentLineIndex=ni;
   lyricsScroll.querySelectorAll('.lyric-line').forEach(function(el,i){
     el.classList.remove('active','past');
-    if(i<currentLineIndex) el.classList.add('past');
-    else if(i===currentLineIndex) el.classList.add('active');
+    if(i<currentLineIndex)el.classList.add('past');
+    else if(i===currentLineIndex)el.classList.add('active');
   });
-  if(currentLineIndex>=0){
-    var el=document.getElementById('ll'+currentLineIndex);
-    if(el) lyricsScroll.scrollTo({top:el.offsetTop-(lyricsScroll.clientHeight/2)+(el.clientHeight/2),behavior:'smooth'});
-  }
+  if(currentLineIndex>=0){var el=document.getElementById('ll'+currentLineIndex);if(el)lyricsScroll.scrollTo({top:el.offsetTop-(lyricsScroll.clientHeight/2)+(el.clientHeight/2),behavior:'smooth'});}
 }
 function fetchLyrics(){
-  if(lyricsLoaded) return; lyricsLoaded=true;
+  if(lyricsLoaded)return;lyricsLoaded=true;
   lyricsScroll.innerHTML='<div class="lyric-loading">🎤 Buscando letra...</div>';
   fetch('https://lrclib.net/api/search?q='+encodeURIComponent(titleStr+' '+artistStr))
     .then(function(r){return r.json();})
@@ -463,13 +665,12 @@ function fetchLyrics(){
           var h='<div style="height:30px"></div>';
           plain.split('\n').forEach(function(l){h+=l.trim()?'<div class="lyric-line" style="color:rgba(255,255,255,.65)">'+esc(l)+'</div>':'<div style="height:10px"></div>';});
           lyricsScroll.innerHTML=h;
-        } else lyricsScroll.innerHTML='<div class="lyric-none">😔 Sin letra disponible</div>';
+        }else lyricsScroll.innerHTML='<div class="lyric-none">😔 Sin letra disponible</div>';
       }
     }).catch(function(){lyricsScroll.innerHTML='<div class="lyric-none">⚠️ Error de conexión</div>';});
 }
-
 lyricsBtn.addEventListener('click',function(e){
-  e.stopPropagation(); unlocked=true;
+  e.stopPropagation();unlocked=true;
   lyricsVisible=!lyricsVisible;
   if(lyricsVisible){lyricsOverlay.classList.add('visible');lyricsBtn.classList.add('active');fetchLyrics();}
   else{lyricsOverlay.classList.remove('visible');lyricsBtn.classList.remove('active');}
