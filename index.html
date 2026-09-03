@@ -34,6 +34,9 @@
 </head>
 <body class="h-full flex flex-col justify-between p-3 max-w-md mx-auto select-none overflow-hidden">
     
+    <!-- Elemento Audio HTML5 para Reproducción Real -->
+    <audio id="audioPlayer" preload="auto"></audio>
+
     <!-- Header -->
     <header class="flex justify-between items-center py-1">
         <div class="flex items-center space-x-2">
@@ -67,10 +70,10 @@
     <footer class="glass rounded-2xl p-4 mb-1 shadow-2xl space-y-3">
         <!-- Progress Bar -->
         <div class="space-y-1">
-            <input type="range" id="seekBar" value="25" max="100" class="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-400">
+            <input type="range" id="seekBar" value="0" max="100" class="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-400">
             <div class="flex justify-between text-[11px] text-slate-400 font-mono">
-                <span id="currentTime">0:45</span>
-                <span id="durationTime">3:45</span>
+                <span id="currentTime">0:00</span>
+                <span id="durationTime">0:00</span>
             </div>
         </div>
 
@@ -93,12 +96,15 @@
             tg.ready();
         }
 
+        const audio = document.getElementById('audioPlayer');
         const vinyl = document.getElementById('vinylDisk');
         const playBtn = document.getElementById('playBtn');
         const songTitle = document.getElementById('songTitle');
         const songArtist = document.getElementById('songArtist');
+        const seekBar = document.getElementById('seekBar');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationTimeEl = document.getElementById('durationTime');
 
-        // Función robusta para leer parámetros de URL o Hash
         function getQueryOrHashParam(key) {
             const searchParams = new URLSearchParams(window.location.search);
             if (searchParams.has(key)) return searchParams.get(key);
@@ -109,12 +115,10 @@
 
         const titleParam = getQueryOrHashParam('title');
         const artistParam = getQueryOrHashParam('artist');
-        const startParam = tg?.initDataUnsafe?.start_param;
+        const audioUrlParam = getQueryOrHashParam('audio') || getQueryOrHashParam('stream');
 
         if (titleParam) {
             songTitle.innerText = decodeURIComponent(titleParam);
-        } else if (startParam) {
-            songTitle.innerText = decodeURIComponent(startParam).replace(/_/g, " ");
         } else {
             songTitle.innerText = "Reproduciendo Pista";
         }
@@ -125,16 +129,62 @@
             songArtist.innerText = "GHOST1D_Solutions Catalog";
         }
 
-        let isPlaying = true;
-
-        playBtn.addEventListener('click', () => {
-            isPlaying = !isPlaying;
-            if (isPlaying) {
+        if (audioUrlParam) {
+            audio.src = decodeURIComponent(audioUrlParam);
+            audio.play().then(() => {
                 vinyl.classList.remove('paused');
                 playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-            } else {
+            }).catch(err => {
+                console.log("Autoplay bloqueado:", err);
+            });
+        }
+
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return "0:00";
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        // Actualización de tiempo real del audio
+        audio.addEventListener('timeupdate', () => {
+            if (audio.duration) {
+                const pct = (audio.currentTime / audio.duration) * 100;
+                seekBar.value = pct;
+                currentTimeEl.innerText = formatTime(audio.currentTime);
+                durationTimeEl.innerText = formatTime(audio.duration);
+            }
+        });
+
+        audio.addEventListener('loadedmetadata', () => {
+            durationTimeEl.innerText = formatTime(audio.duration);
+        });
+
+        seekBar.addEventListener('input', () => {
+            if (audio.duration) {
+                audio.currentTime = (seekBar.value / 100) * audio.duration;
+            }
+        });
+
+        playBtn.addEventListener('click', () => {
+            if (audio.src && audio.paused) {
+                audio.play();
+                vinyl.classList.remove('paused');
+                playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+            } else if (audio.src && !audio.paused) {
+                audio.pause();
                 vinyl.classList.add('paused');
                 playBtn.innerHTML = '<i class="fa-solid fa-play ml-0.5"></i>';
+            } else {
+                // Simulación visual
+                const isSpinning = !vinyl.classList.contains('paused');
+                if (isSpinning) {
+                    vinyl.classList.add('paused');
+                    playBtn.innerHTML = '<i class="fa-solid fa-play ml-0.5"></i>';
+                } else {
+                    vinyl.classList.remove('paused');
+                    playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                }
             }
         });
     </script>
