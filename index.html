@@ -34,8 +34,8 @@
 </head>
 <body class="h-full flex flex-col justify-between p-3 max-w-md mx-auto select-none overflow-hidden">
     
-    <!-- Elemento Audio HTML5 para Reproducción Real -->
-    <audio id="audioPlayer" preload="auto"></audio>
+    <!-- Elemento Audio HTML5 para Reproducción Real HTTPS -->
+    <audio id="audioPlayer" preload="auto" crossorigin="anonymous"></audio>
 
     <!-- Header -->
     <header class="flex justify-between items-center py-1">
@@ -99,6 +99,7 @@
         const audio = document.getElementById('audioPlayer');
         const vinyl = document.getElementById('vinylDisk');
         const playBtn = document.getElementById('playBtn');
+        const coverArt = document.getElementById('coverArt');
         const songTitle = document.getElementById('songTitle');
         const songArtist = document.getElementById('songArtist');
         const seekBar = document.getElementById('seekBar');
@@ -115,7 +116,6 @@
 
         const titleParam = getQueryOrHashParam('title');
         const artistParam = getQueryOrHashParam('artist');
-        const audioUrlParam = getQueryOrHashParam('audio') || getQueryOrHashParam('stream');
 
         if (titleParam) {
             songTitle.innerText = decodeURIComponent(titleParam);
@@ -129,14 +129,31 @@
             songArtist.innerText = "GHOST1D_Solutions Catalog";
         }
 
-        if (audioUrlParam) {
-            audio.src = decodeURIComponent(audioUrlParam);
-            audio.play().then(() => {
-                vinyl.classList.remove('paused');
-                playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-            }).catch(err => {
-                console.log("Autoplay bloqueado:", err);
-            });
+        // Búsqueda automática de Carátula HD y Audio HTTPS mediante iTunes API
+        if (titleParam && artistParam) {
+            const searchQuery = encodeURIComponent(decodeURIComponent(titleParam) + " " + decodeURIComponent(artistParam));
+            fetch(`https://itunes.apple.com/search?term=${searchQuery}&entity=song&limit=1`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.results && data.results.length > 0) {
+                        const track = data.results[0];
+                        
+                        // 1. Cargar carátula de álbum HD 500x500
+                        if (track.artworkUrl100) {
+                            coverArt.src = track.artworkUrl100.replace('100x100bb', '500x500bb');
+                        }
+                        
+                        // 2. Cargar y reproducir audio HTTPS inmediatamente
+                        if (track.previewUrl) {
+                            audio.src = track.previewUrl;
+                            audio.play().then(() => {
+                                vinyl.classList.remove('paused');
+                                playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                            }).catch(e => console.log("Play error:", e));
+                        }
+                    }
+                })
+                .catch(err => console.log("Metadata error:", err));
         }
 
         function formatTime(seconds) {
@@ -146,7 +163,6 @@
             return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
         }
 
-        // Actualización de tiempo real del audio
         audio.addEventListener('timeupdate', () => {
             if (audio.duration) {
                 const pct = (audio.currentTime / audio.duration) * 100;
@@ -175,16 +191,6 @@
                 audio.pause();
                 vinyl.classList.add('paused');
                 playBtn.innerHTML = '<i class="fa-solid fa-play ml-0.5"></i>';
-            } else {
-                // Simulación visual
-                const isSpinning = !vinyl.classList.contains('paused');
-                if (isSpinning) {
-                    vinyl.classList.add('paused');
-                    playBtn.innerHTML = '<i class="fa-solid fa-play ml-0.5"></i>';
-                } else {
-                    vinyl.classList.remove('paused');
-                    playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-                }
             }
         });
     </script>
