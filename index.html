@@ -6,189 +6,292 @@
 <title>GHOST1D Player</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;width:100%;overflow:hidden;touch-action:none;
-background:linear-gradient(160deg,#020617 0%,#0f172a 60%,#020617 100%);
-color:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
-display:flex;flex-direction:column;align-items:center;}
-
-#app{width:100%;max-width:420px;height:100%;display:flex;flex-direction:column;
-justify-content:space-between;padding:12px 14px 10px;}
-
-/* HEADER */
-header{display:flex;justify-content:space-between;align-items:center;padding:4px 0;flex-shrink:0;}
-.logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;color:#38bdf8;letter-spacing:.5px;}
-.redled{position:relative;display:flex;align-items:center;justify-content:center;width:14px;height:14px;}
-.redled-ping{position:absolute;width:14px;height:14px;border-radius:50%;background:#ef4444;opacity:.5;animation:ping 1.4s ease-in-out infinite;}
-.redled-dot{position:relative;width:10px;height:10px;border-radius:50%;background:#dc2626;box-shadow:0 0 10px #ef4444,0 0 20px #ef4444;}
-@keyframes ping{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.6);opacity:0}}
-.badge{font-size:10px;padding:3px 10px;border-radius:99px;background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.35);color:#7dd3fc;font-family:monospace;letter-spacing:1px;}
-
-/* MAIN AREA */
-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;position:relative;}
-
-/* ───── TOCADISCOS ───── */
-#vinylView{display:flex;flex-direction:column;align-items:center;justify-content:center;
-width:100%;transition:opacity .5s,filter .5s;}
-#vinylView.dimmed{opacity:.25;filter:blur(2px);pointer-events:none;}
-
-.turntable{position:relative;width:220px;height:220px;display:flex;align-items:center;justify-content:center;}
-
-.tonearm{position:absolute;top:-16px;right:4px;width:60px;height:120px;
-transform-origin:84% 14%;transform:rotate(-32deg);transition:transform .6s cubic-bezier(.4,0,.2,1);z-index:20;}
-.tonearm-pivot{position:absolute;top:2px;right:2px;width:26px;height:26px;border-radius:50%;
-background:linear-gradient(135deg,#475569,#64748b);border:2px solid rgba(56,189,248,.5);
-display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px rgba(56,189,248,.3);}
-.tonearm-pivot-dot{width:8px;height:8px;border-radius:50%;background:#38bdf8;box-shadow:0 0 6px #38bdf8;}
-.tonearm-arm{position:absolute;top:20px;right:14px;width:5px;height:90px;
-background:linear-gradient(180deg,#cbd5e1,#f8fafc,#94a3b8);border-radius:3px;}
-.tonearm-head{position:absolute;bottom:2px;right:10px;width:14px;height:26px;
-background:#0f172a;border:1px solid #38bdf8;border-radius:3px;
-display:flex;align-items:flex-end;justify-content:center;padding-bottom:3px;}
-.tonearm-needle{width:5px;height:7px;border-radius:50%;background:#ef4444;
-box-shadow:0 0 8px #ef4444,0 0 16px #ef4444;animation:npulse 1.2s ease-in-out infinite;}
-@keyframes npulse{0%,100%{opacity:1}50%{opacity:.4}}
-
-#vinylDisk{position:absolute;width:190px;height:190px;border-radius:50%;
-background:#0a0a1a;border:4px solid #1e293b;display:flex;align-items:center;justify-content:center;
-box-shadow:0 0 40px rgba(0,0,0,.8);}
-#vinylDisk.spinning{animation:spin 8s linear infinite;}
-@keyframes spin{100%{transform:rotate(360deg)}}
-.vinyl-ring1{position:absolute;inset:8px;border-radius:50%;border:1px solid rgba(56,189,248,.1);}
-.vinyl-ring2{position:absolute;inset:18px;border-radius:50%;border:1px solid rgba(56,189,248,.07);}
-.vinyl-ring3{position:absolute;inset:30px;border-radius:50%;border:1px solid rgba(56,189,248,.05);}
-.vinyl-center{width:60px;height:60px;border-radius:50%;
-background:linear-gradient(135deg,#0ea5e9,#3b82f6,#38bdf8);border:3px solid #0a0a1a;
-display:flex;align-items:center;justify-content:center;
-box-shadow:0 0 20px rgba(56,189,248,.5),0 0 40px rgba(56,189,248,.2);}
-.vinyl-hole{width:12px;height:12px;border-radius:50%;background:#0a0a1a;}
-
-#coverArt{position:relative;z-index:10;width:140px;height:140px;border-radius:16px;
-object-fit:cover;border:2px solid rgba(56,189,248,.4);
-box-shadow:0 0 20px rgba(56,189,248,.4),0 8px 32px rgba(0,0,0,.6);}
-
-.meta{text-align:center;margin-top:14px;padding:0 8px;}
-#songTitle{font-size:17px;font-weight:700;color:#f8fafc;
-white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px;}
-#songArtist{font-size:12px;color:rgba(56,189,248,.8);margin-top:3px;
-white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;}
-
-/* ───── PANEL DE LETRAS (Shazam style) ───── */
-#lyricsPanel{
-  position:absolute;inset:0;
-  display:none;flex-direction:column;align-items:center;
-  overflow:hidden;padding:8px 6px 0;
+html,body{
+  height:100%;width:100%;overflow:hidden;touch-action:none;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+  color:#fff;
 }
-#lyricsPanel.visible{display:flex;}
 
+/* ─── Fondo dinámico con la portada del álbum ─── */
+#bgBlur{
+  position:fixed;inset:0;z-index:0;
+  background:#1a0a1e;
+  background-size:cover;background-position:center;
+  filter:blur(60px) brightness(0.45) saturate(1.8);
+  transform:scale(1.15);
+  transition:background-image .8s ease;
+}
+#bgOverlay{
+  position:fixed;inset:0;z-index:1;
+  background:linear-gradient(180deg,rgba(0,0,0,.1) 0%,rgba(0,0,0,.6) 100%);
+}
+
+/* ─── App container ─── */
+#app{
+  position:relative;z-index:2;
+  width:100%;max-width:420px;height:100%;
+  margin:0 auto;
+  display:flex;flex-direction:column;
+  padding:14px 28px 18px;
+  justify-content:space-between;
+}
+
+/* ─── Header ─── */
+header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:4px 0 0;
+}
+.hdr-left{display:flex;align-items:center;gap:7px;}
+.redled{position:relative;display:flex;align-items:center;justify-content:center;width:13px;height:13px;}
+.redled-ping{position:absolute;width:13px;height:13px;border-radius:50%;background:#ff3b30;opacity:.5;animation:ping 1.4s ease-in-out infinite;}
+.redled-dot{position:relative;width:9px;height:9px;border-radius:50%;background:#ff3b30;box-shadow:0 0 8px #ff3b30;}
+@keyframes ping{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.7);opacity:0}}
+.hdr-title{font-size:13px;font-weight:600;letter-spacing:.3px;opacity:.85;}
+.hdr-badge{font-size:10px;padding:2px 9px;border-radius:99px;background:rgba(255,255,255,.12);color:rgba(255,255,255,.75);font-family:monospace;letter-spacing:.5px;}
+
+/* ─── Portada del Álbum ─── */
+.cover-wrap{
+  display:flex;justify-content:center;align-items:center;
+  margin:8px 0 4px;
+  flex:0 0 auto;
+}
+#coverArt{
+  width:220px;height:220px;
+  border-radius:18px;
+  object-fit:cover;
+  box-shadow:0 20px 60px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.08);
+  transition:src .5s;
+}
+
+/* ─── Metadata ─── */
+.meta{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  margin:16px 0 4px;
+}
+.meta-text{flex:1;overflow:hidden;}
+#songTitle{
+  font-size:20px;font-weight:700;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  letter-spacing:-.3px;
+}
+#songArtist{
+  font-size:14px;font-weight:400;opacity:.7;margin-top:3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.meta-star{font-size:20px;opacity:.5;cursor:pointer;padding-left:10px;flex-shrink:0;}
+.meta-star:hover{opacity:.9;}
+
+/* ─── Barra de progreso ─── */
+.progress-section{margin:10px 0 6px;}
+#seekBar{
+  width:100%;height:4px;
+  appearance:none;background:rgba(255,255,255,.25);
+  border-radius:4px;cursor:pointer;outline:none;
+}
+#seekBar::-webkit-slider-thumb{
+  appearance:none;width:16px;height:16px;border-radius:50%;
+  background:#fff;box-shadow:0 0 6px rgba(0,0,0,.5);cursor:pointer;
+}
+.times{
+  display:flex;justify-content:space-between;
+  margin-top:7px;font-size:12px;opacity:.65;font-variant-numeric:tabular-nums;
+}
+
+/* ─── Controles ─── */
+.controls{
+  display:flex;justify-content:space-between;align-items:center;
+  margin:8px 0;
+  padding:0 6px;
+}
+.ctrl-btn{
+  background:none;border:none;cursor:pointer;
+  color:rgba(255,255,255,.85);
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity .15s,transform .1s;
+  padding:4px;
+}
+.ctrl-btn:active{opacity:.5;transform:scale(.88);}
+.ctrl-icon-sm{width:26px;height:26px;}
+.ctrl-icon-md{width:34px;height:34px;}
+
+#playBtn{
+  width:68px;height:68px;
+  border-radius:50%;border:none;cursor:pointer;
+  background:rgba(255,255,255,.9);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px rgba(0,0,0,.45);
+  transition:transform .1s,opacity .15s;
+}
+#playBtn:active{transform:scale(.9);opacity:.8;}
+.play-icon{width:28px;height:28px;fill:#000;}
+
+/* ─── Volumen ─── */
+.volume-row{
+  display:flex;align-items:center;gap:10px;
+  margin:0 0 6px;
+}
+.vol-icon{width:18px;height:18px;opacity:.55;}
+#volBar{
+  flex:1;height:4px;
+  appearance:none;background:rgba(255,255,255,.25);
+  border-radius:4px;cursor:pointer;outline:none;
+}
+#volBar::-webkit-slider-thumb{
+  appearance:none;width:14px;height:14px;border-radius:50%;
+  background:rgba(255,255,255,.85);cursor:pointer;
+}
+
+/* ─── Footer inferior ─── */
+footer{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:0 10px;
+}
+.foot-btn{
+  background:none;border:none;cursor:pointer;
+  color:rgba(255,255,255,.65);font-size:18px;
+  padding:6px;transition:color .2s,opacity .15s;
+  display:flex;align-items:center;
+}
+.foot-btn:active{opacity:.5;}
+.foot-btn.active{color:#fff;}
+#lyricsBtn{font-size:17px;}
+
+/* ─── Panel letras (Shazam style) ─── */
+#lyricsOverlay{
+  position:fixed;inset:0;z-index:50;
+  display:none;flex-direction:column;
+  background:rgba(0,0,0,.82);backdrop-filter:blur(18px);
+  padding:24px 20px 100px;
+}
+#lyricsOverlay.visible{display:flex;}
+.lyrics-header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:16px;
+}
+.lyrics-header-title{font-size:14px;font-weight:600;opacity:.7;}
+#closeLyricsBtn{
+  background:none;border:none;cursor:pointer;
+  color:rgba(255,255,255,.7);font-size:22px;
+}
 #lyricsScroll{
-  width:100%;flex:1;overflow-y:auto;overflow-x:hidden;
-  padding:20px 8px 40px;
-  scrollbar-width:none;
-  -ms-overflow-style:none;
-  scroll-behavior:smooth;
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  scrollbar-width:none;scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;
 }
 #lyricsScroll::-webkit-scrollbar{display:none;}
-
 .lyric-line{
-  text-align:center;
-  font-size:16px;
-  font-weight:600;
-  color:rgba(148,163,184,.45);
-  padding:9px 4px;
-  line-height:1.5;
-  transition:color .35s, font-size .35s, text-shadow .35s;
-  cursor:default;
+  text-align:center;font-size:17px;font-weight:600;
+  color:rgba(255,255,255,.28);padding:10px 4px;line-height:1.5;
+  transition:color .3s,font-size .3s,text-shadow .3s;
 }
 .lyric-line.active{
-  color:#f8fafc;
-  font-size:19px;
-  text-shadow:0 0 20px rgba(56,189,248,.8),0 0 40px rgba(56,189,248,.4);
+  color:#fff;font-size:21px;
+  text-shadow:0 0 30px rgba(255,255,255,.5);
 }
-.lyric-line.past{
-  color:rgba(148,163,184,.25);
+.lyric-line.past{color:rgba(255,255,255,.15);}
+.lyric-loading,.lyric-none{
+  text-align:center;color:rgba(255,255,255,.45);
+  font-size:14px;padding:60px 20px;line-height:2;
 }
-.lyric-loading{
-  text-align:center;color:rgba(56,189,248,.6);font-size:13px;padding:40px 0;
-  animation:fadeInOut 1.5s ease-in-out infinite;
-}
-@keyframes fadeInOut{0%,100%{opacity:.4}50%{opacity:1}}
-.lyric-none{text-align:center;color:rgba(148,163,184,.5);font-size:13px;padding:40px 16px;line-height:1.8;}
-
-/* FOOTER */
-footer{flex-shrink:0;background:rgba(15,23,42,.85);backdrop-filter:blur(20px);
-border:1px solid rgba(56,189,248,.15);border-radius:20px;padding:12px 14px 12px;margin-bottom:4px;
-box-shadow:0 8px 32px rgba(0,0,0,.5);}
-
-.progress-row{margin-bottom:6px;}
-#seekBar{width:100%;height:4px;appearance:none;background:#1e293b;border-radius:4px;cursor:pointer;outline:none;}
-#seekBar::-webkit-slider-thumb{appearance:none;width:14px;height:14px;border-radius:50%;background:#38bdf8;box-shadow:0 0 8px #38bdf8;cursor:pointer;}
-.times{display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:rgba(125,211,252,.8);font-family:monospace;}
-
-.controls{display:flex;justify-content:space-between;align-items:center;padding:0 4px;}
-.ctrl-btn{background:none;border:none;cursor:pointer;color:#94a3b8;font-size:18px;padding:4px 6px;transition:color .2s;}
-.ctrl-btn:hover,.ctrl-btn.active{color:#38bdf8;}
-#playBtn{width:50px;height:50px;border-radius:50%;border:none;cursor:pointer;
-background:linear-gradient(135deg,#0ea5e9,#3b82f6);
-display:flex;align-items:center;justify-content:center;
-box-shadow:0 0 20px rgba(56,189,248,.5),0 4px 15px rgba(0,0,0,.4);
-transition:transform .1s;font-size:20px;color:#020617;font-weight:900;}
-#playBtn:active{transform:scale(.92);}
-#lyricsBtn{font-size:15px;}
 </style>
 </head>
 <body>
+
+<!-- Fondo difuminado dinámico -->
+<div id="bgBlur"></div>
+<div id="bgOverlay"></div>
+
+<!-- Panel de Letras Sincronizadas (sobre todo) -->
+<div id="lyricsOverlay">
+  <div class="lyrics-header">
+    <span class="lyrics-header-title">🎤 Letras sincronizadas</span>
+    <button id="closeLyricsBtn">✕</button>
+  </div>
+  <div id="lyricsScroll">
+    <div class="lyric-loading">Buscando letra...</div>
+  </div>
+</div>
+
 <audio id="audioPlayer" preload="auto"></audio>
 
 <div id="app">
+  <!-- Header -->
   <header>
-    <div class="logo">
+    <div class="hdr-left">
       <div class="redled"><div class="redled-ping"></div><div class="redled-dot"></div></div>
-      ⚡ GHOST1D Player
+      <span class="hdr-title">⚡ GHOST1D Player</span>
     </div>
-    <div class="badge">NEON V2.0</div>
+    <div class="hdr-badge">NEON V2.0</div>
   </header>
 
-  <main>
-    <!-- Vista del Tocadiscos -->
-    <div id="vinylView">
-      <div class="turntable">
-        <div class="tonearm" id="tonearm">
-          <div class="tonearm-pivot"><div class="tonearm-pivot-dot"></div></div>
-          <div class="tonearm-arm"></div>
-          <div class="tonearm-head"><div class="tonearm-needle"></div></div>
-        </div>
-        <div id="vinylDisk">
-          <div class="vinyl-ring1"></div><div class="vinyl-ring2"></div><div class="vinyl-ring3"></div>
-          <div class="vinyl-center"><div class="vinyl-hole"></div></div>
-        </div>
-        <img id="coverArt" src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&q=80" alt="cover">
-      </div>
-      <div class="meta">
-        <div id="songTitle">Cargando canción...</div>
-        <div id="songArtist">GHOST1D_Solutions Catalog</div>
-      </div>
-    </div>
+  <!-- Portada -->
+  <div class="cover-wrap">
+    <img id="coverArt" src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&q=80" alt="cover">
+  </div>
 
-    <!-- Panel de Letras Sincronizadas (Shazam style) -->
-    <div id="lyricsPanel">
-      <div id="lyricsScroll">
-        <div class="lyric-loading">🎤 Buscando letra...</div>
-      </div>
+  <!-- Metadata + estrella -->
+  <div class="meta">
+    <div class="meta-text">
+      <div id="songTitle">Cargando canción...</div>
+      <div id="songArtist">GHOST1D_Solutions Catalog</div>
     </div>
-  </main>
+    <span class="meta-star">☆</span>
+  </div>
 
+  <!-- Progreso -->
+  <div class="progress-section">
+    <input type="range" id="seekBar" value="0" max="100">
+    <div class="times">
+      <span id="currentTime">0:00</span>
+      <span id="durationTime">-0:00</span>
+    </div>
+  </div>
+
+  <!-- Botones de control (estilo iOS) -->
+  <div class="controls">
+    <!-- Atrás -->
+    <button class="ctrl-btn" id="prevBtn">
+      <svg class="ctrl-icon-md" viewBox="0 0 24 24" fill="rgba(255,255,255,.85)">
+        <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/>
+      </svg>
+    </button>
+
+    <!-- Play/Pause grande -->
+    <button id="playBtn">
+      <svg id="playIcon" class="play-icon" viewBox="0 0 24 24">
+        <path d="M8 5v14l11-7z"/>
+      </svg>
+    </button>
+
+    <!-- Adelante -->
+    <button class="ctrl-btn" id="nextBtn">
+      <svg class="ctrl-icon-md" viewBox="0 0 24 24" fill="rgba(255,255,255,.85)">
+        <path d="M6 18l8.5-6L6 6v12zm2-8.14 5.5 3.89L8 14.64v-4.78zM16 6h2v12h-2z"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Volumen -->
+  <div class="volume-row">
+    <svg class="vol-icon" viewBox="0 0 24 24" fill="rgba(255,255,255,.55)"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+    <input type="range" id="volBar" min="0" max="100" value="85">
+    <svg class="vol-icon" viewBox="0 0 24 24" fill="rgba(255,255,255,.55)"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+  </div>
+
+  <!-- Footer -->
   <footer>
-    <div class="progress-row">
-      <input type="range" id="seekBar" value="0" max="100">
-      <div class="times"><span id="currentTime">0:00</span><span id="durationTime">0:00</span></div>
-    </div>
-    <div class="controls">
-      <button class="ctrl-btn" id="lyricsBtn" title="Ver Letra">🎤</button>
-      <button class="ctrl-btn">⏮</button>
-      <button id="playBtn">▶</button>
-      <button class="ctrl-btn">⏭</button>
-      <button class="ctrl-btn accent">↺</button>
-    </div>
+    <button class="foot-btn" id="lyricsBtn">
+      <!-- Ícono subtítulos/letras -->
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 14v-2.47l6.88-6.88c.2-.2.51-.2.71 0l1.77 1.77c.2.2.2.51 0 .71L8.47 14H6zm14 0h-8.5l2-2H20v2z"/>
+      </svg>
+    </button>
+    <button class="foot-btn">
+      <!-- Ícono cola/lista -->
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
+      </svg>
+    </button>
   </footer>
 </div>
 
@@ -197,21 +300,24 @@ transition:transform .1s;font-size:20px;color:#020617;font-weight:900;}
 try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch(e){}
 
 var audio    = document.getElementById('audioPlayer');
-var vinyl    = document.getElementById('vinylDisk');
-var tonearm  = document.getElementById('tonearm');
 var playBtn  = document.getElementById('playBtn');
+var playIcon = document.getElementById('playIcon');
 var coverArt = document.getElementById('coverArt');
+var bgBlur   = document.getElementById('bgBlur');
 var titleEl  = document.getElementById('songTitle');
 var artistEl = document.getElementById('songArtist');
 var seekBar  = document.getElementById('seekBar');
+var volBar   = document.getElementById('volBar');
 var currEl   = document.getElementById('currentTime');
 var durEl    = document.getElementById('durationTime');
-var lyricsBtn   = document.getElementById('lyricsBtn');
-var lyricsPanel = document.getElementById('lyricsPanel');
-var lyricsScroll= document.getElementById('lyricsScroll');
-var vinylView   = document.getElementById('vinylView');
+var prevBtn  = document.getElementById('prevBtn');
+var nextBtn  = document.getElementById('nextBtn');
+var lyricsBtn    = document.getElementById('lyricsBtn');
+var lyricsOverlay= document.getElementById('lyricsOverlay');
+var closeLyricsBtn = document.getElementById('closeLyricsBtn');
+var lyricsScroll = document.getElementById('lyricsScroll');
 
-// ── Parámetros ─────────────────────────────────────────────────────────────
+// ── Parámetros URL ────────────────────────────────────────────────────────────
 function getParam(k){
   try{
     var s=new URLSearchParams(window.location.search);
@@ -222,41 +328,84 @@ function getParam(k){
   return null;
 }
 
-var titleP  = getParam('title');
-var artistP = getParam('artist');
-var audioP  = getParam('audio');
+var titleP      = getParam('title');
+var artistP     = getParam('artist');
+var audioP      = getParam('audio');
+var prevTitleP  = getParam('prev_title');
+var prevArtistP = getParam('prev_artist');
+var prevAudioP  = getParam('prev_audio');
+var nextTitleP  = getParam('next_title');
+var nextArtistP = getParam('next_artist');
+var nextAudioP  = getParam('next_audio');
 
 var titleStr  = titleP  ? decodeURIComponent(titleP)  : '';
 var artistStr = artistP ? decodeURIComponent(artistP) : '';
+var audioStr  = audioP  ? decodeURIComponent(audioP)  : '';
 
 if(titleStr)  titleEl.innerText  = titleStr;
 if(artistStr) artistEl.innerText = artistStr;
 
-// ── Cargar Audio ────────────────────────────────────────────────────────────
-function loadAudio(src){ audio.src=src; audio.load(); }
-
-if(audioP){
-  loadAudio(decodeURIComponent(audioP));
-} else if(titleStr){
-  fetch('https://itunes.apple.com/search?term='+encodeURIComponent(titleStr+' '+artistStr)+'&entity=song&limit=1')
-    .then(function(r){return r.json();})
-    .then(function(d){
-      if(d.results&&d.results.length>0){
-        var t=d.results[0];
-        if(!titleStr)  titleEl.innerText  = t.trackName;
-        if(!artistStr) artistEl.innerText = t.artistName;
-        if(t.artworkUrl100) coverArt.src  = t.artworkUrl100.replace('100x100bb','500x500bb');
-        if(t.previewUrl) loadAudio(t.previewUrl);
-      }
-    }).catch(function(){});
+// ── Actualizar fondo y carátula ───────────────────────────────────────────────
+function updateCover(imgSrc){
+  coverArt.src = imgSrc;
+  bgBlur.style.backgroundImage = 'url(' + imgSrc + ')';
 }
 
-// ── Tocadiscos ──────────────────────────────────────────────────────────────
+// ── Cargar audio y metadata ───────────────────────────────────────────────────
+function loadTrack(src, title, artist, cover){
+  if(title)  titleEl.innerText  = title;
+  if(artist) artistEl.innerText = artist;
+  if(cover)  updateCover(cover);
+  audio.src = src;
+  audio.load();
+}
+
+function fetchAndLoad(title, artist, audioSrc){
+  // Si tenemos audio directo de Telegram CDN, cargar de una vez
+  if(audioSrc){
+    audio.src = audioSrc;
+    audio.load();
+  }
+  // Siempre buscar carátula HD en iTunes
+  if(title){
+    fetch('https://itunes.apple.com/search?term='+encodeURIComponent(title+' '+artist)+'&entity=song&limit=1')
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(d.results&&d.results.length>0){
+          var t=d.results[0];
+          if(!titleStr)  { titleEl.innerText=t.trackName; titleStr=t.trackName; }
+          if(!artistStr) { artistEl.innerText=t.artistName; artistStr=t.artistName; }
+          var img = t.artworkUrl100.replace('100x100bb','500x500bb');
+          updateCover(img);
+          // Solo usar preview de iTunes si no hay audio de Telegram
+          if(!audioSrc && t.previewUrl){
+            audio.src = t.previewUrl;
+            audio.load();
+          }
+        }
+      }).catch(function(){});
+  }
+}
+
+fetchAndLoad(titleStr, artistStr, audioStr);
+
+// ── Formato de tiempo ─────────────────────────────────────────────────────────
+function fmt(s,remaining){
+  if(isNaN(s)||!isFinite(s))return'0:00';
+  var m=Math.floor(s/60),sec=Math.floor(s%60);
+  return (remaining?'-':'')+m+':'+(sec<10?'0':'')+sec;
+}
+
+// ── Estado play/pausa ─────────────────────────────────────────────────────────
 function setPlaying(p){
-  if(p){ vinyl.classList.add('spinning'); tonearm.style.transform='rotate(0deg)'; playBtn.innerText='⏸'; }
-  else { vinyl.classList.remove('spinning'); tonearm.style.transform='rotate(-32deg)'; playBtn.innerText='▶'; }
+  if(p){
+    playIcon.innerHTML='<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+  } else {
+    playIcon.innerHTML='<path d="M8 5v14l11-7z"/>';
+  }
 }
 
+// Desbloqueo primer toque (Android)
 var unlocked=false;
 function unlock(){
   if(unlocked)return; unlocked=true;
@@ -267,21 +416,35 @@ document.addEventListener('click',unlock,{once:true});
 
 audio.addEventListener('play',  function(){setPlaying(true);});
 audio.addEventListener('pause', function(){setPlaying(false);});
-audio.addEventListener('ended', function(){setPlaying(false);seekBar.value=0;currEl.innerText='0:00';});
+audio.addEventListener('ended', function(){
+  setPlaying(false); seekBar.value=0;
+  currEl.innerText='0:00'; durEl.innerText='-0:00';
+});
 audio.addEventListener('timeupdate', function(){
   if(audio.duration){
-    seekBar.value=(audio.currentTime/audio.duration)*100;
-    currEl.innerText=fmt(audio.currentTime);
-    durEl.innerText=fmt(audio.duration);
+    var pct=(audio.currentTime/audio.duration)*100;
+    seekBar.value=pct;
+    currEl.innerText=fmt(audio.currentTime, false);
+    durEl.innerText=fmt(audio.duration-audio.currentTime, true);
     if(lyricsVisible) updateActiveLine(audio.currentTime);
   }
 });
-audio.addEventListener('loadedmetadata',function(){durEl.innerText=fmt(audio.duration);});
+audio.addEventListener('loadedmetadata',function(){
+  durEl.innerText=fmt(audio.duration,true);
+});
 
 seekBar.addEventListener('input',function(){
   if(audio.duration) audio.currentTime=(seekBar.value/100)*audio.duration;
 });
 
+// Volumen
+volBar.value = 85;
+audio.volume = 0.85;
+volBar.addEventListener('input',function(){
+  audio.volume = volBar.value/100;
+});
+
+// Play/Pause
 playBtn.addEventListener('click',function(e){
   e.stopPropagation(); unlocked=true;
   if(!audio.src)return;
@@ -289,139 +452,144 @@ playBtn.addEventListener('click',function(e){
   else { audio.pause(); setPlaying(false); }
 });
 
-// ── Letras Sincronizadas (Shazam Style) ────────────────────────────────────
+// ── Botones Anterior / Siguiente ─────────────────────────────────────────────
+prevBtn.addEventListener('click',function(e){
+  e.stopPropagation(); unlocked=true;
+  if(!prevAudioP) return;
+  var wasPlaying = !audio.paused;
+  lyricsLoaded=false; lyricsVisible=false;
+  lyricsOverlay.classList.remove('visible');
+  lyricsBtn.classList.remove('active');
+  fetchAndLoad(
+    prevTitleP ? decodeURIComponent(prevTitleP) : '',
+    prevArtistP ? decodeURIComponent(prevArtistP) : '',
+    decodeURIComponent(prevAudioP)
+  );
+  if(wasPlaying) audio.play().then(function(){setPlaying(true);}).catch(function(){});
+});
+
+nextBtn.addEventListener('click',function(e){
+  e.stopPropagation(); unlocked=true;
+  if(!nextAudioP) return;
+  var wasPlaying = !audio.paused;
+  lyricsLoaded=false; lyricsVisible=false;
+  lyricsOverlay.classList.remove('visible');
+  lyricsBtn.classList.remove('active');
+  fetchAndLoad(
+    nextTitleP ? decodeURIComponent(nextTitleP) : '',
+    nextArtistP ? decodeURIComponent(nextArtistP) : '',
+    decodeURIComponent(nextAudioP)
+  );
+  if(wasPlaying) audio.play().then(function(){setPlaying(true);}).catch(function(){});
+});
+
+// Atenuar botones si no hay pista prev/next
+if(!prevAudioP) prevBtn.style.opacity='0.25';
+if(!nextAudioP) nextBtn.style.opacity='0.25';
+
+// ── Letras Sincronizadas (Shazam style) ──────────────────────────────────────
 var lyricsVisible = false;
-var lrcLines = [];    // [{time: segundos, text: string}]
-var lyricsLoaded = false;
+var lyricsLoaded  = false;
+var lrcLines      = [];
 var currentLineIndex = -1;
 
-function parseLRC(lrcText){
-  var lines = [];
-  var re = /\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/;
-  lrcText.split('\n').forEach(function(line){
-    var m = line.match(re);
+function parseLRC(txt){
+  var lines=[];
+  var re=/\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/;
+  txt.split('\n').forEach(function(l){
+    var m=l.match(re);
     if(m){
-      var secs = parseInt(m[1])*60 + parseInt(m[2]) + parseInt(m[3])/1000;
-      var text = m[4].trim();
-      if(text) lines.push({time: secs, text: text});
+      var s=parseInt(m[1])*60+parseInt(m[2])+parseInt(m[3])/1000;
+      var t=m[4].trim();
+      if(t) lines.push({time:s,text:t});
     }
   });
   return lines.sort(function(a,b){return a.time-b.time;});
 }
 
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
 function renderLyrics(){
-  if(lrcLines.length===0){
-    lyricsScroll.innerHTML='<div class="lyric-none">😔 No se encontró letra sincronizada para esta canción.<br><br>Disfruta la música 🎵</div>';
+  if(!lrcLines.length){
+    lyricsScroll.innerHTML='<div class="lyric-none">😔 No se encontró letra sincronizada.<br><br>Disfruta la música 🎵</div>';
     return;
   }
-  var html='<div style="height:40px"></div>';
-  lrcLines.forEach(function(line, i){
-    html += '<div class="lyric-line" id="ll'+i+'" data-t="'+line.time+'">'+escapeHtml(line.text)+'</div>';
-  });
-  html += '<div style="height:80px"></div>';
-  lyricsScroll.innerHTML = html;
+  var h='<div style="height:50px"></div>';
+  lrcLines.forEach(function(l,i){ h+='<div class="lyric-line" id="ll'+i+'">'+esc(l.text)+'</div>'; });
+  h+='<div style="height:120px"></div>';
+  lyricsScroll.innerHTML=h;
 }
 
-function escapeHtml(s){
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function updateActiveLine(currentTime){
-  if(lrcLines.length===0) return;
-  var newIdx = -1;
-  for(var i=0; i<lrcLines.length; i++){
-    if(lrcLines[i].time <= currentTime) newIdx = i;
-    else break;
+function updateActiveLine(t){
+  if(!lrcLines.length) return;
+  var ni=-1;
+  for(var i=0;i<lrcLines.length;i++){
+    if(lrcLines[i].time<=t) ni=i; else break;
   }
-  if(newIdx === currentLineIndex) return;
-  currentLineIndex = newIdx;
-
-  // Actualizar clases
-  var all = lyricsScroll.querySelectorAll('.lyric-line');
-  all.forEach(function(el, i){
+  if(ni===currentLineIndex) return;
+  currentLineIndex=ni;
+  lyricsScroll.querySelectorAll('.lyric-line').forEach(function(el,i){
     el.classList.remove('active','past');
-    if(i < currentLineIndex) el.classList.add('past');
-    else if(i === currentLineIndex) el.classList.add('active');
+    if(i<currentLineIndex) el.classList.add('past');
+    else if(i===currentLineIndex) el.classList.add('active');
   });
-
-  // Centrar la línea activa
-  if(currentLineIndex >= 0){
-    var activeEl = document.getElementById('ll'+currentLineIndex);
-    if(activeEl){
-      var scrollTarget = activeEl.offsetTop - (lyricsScroll.clientHeight/2) + (activeEl.clientHeight/2);
-      lyricsScroll.scrollTo({top: scrollTarget, behavior:'smooth'});
-    }
+  if(currentLineIndex>=0){
+    var el=document.getElementById('ll'+currentLineIndex);
+    if(el) lyricsScroll.scrollTo({top:el.offsetTop-(lyricsScroll.clientHeight/2)+(el.clientHeight/2),behavior:'smooth'});
   }
 }
 
 function fetchLyrics(){
   if(lyricsLoaded) return;
-  lyricsLoaded = true;
+  lyricsLoaded=true;
   lyricsScroll.innerHTML='<div class="lyric-loading">🎤 Buscando letra sincronizada...</div>';
-
-  var q = encodeURIComponent(titleStr + (artistStr?' '+artistStr:''));
+  var q=encodeURIComponent(titleStr+(artistStr?' '+artistStr:''));
   fetch('https://lrclib.net/api/search?q='+q)
     .then(function(r){return r.json();})
     .then(function(data){
-      if(!data || data.length===0){
-        lyricsScroll.innerHTML='<div class="lyric-none">😔 No se encontró letra para esta canción.<br>Disfruta la música 🎵</div>';
-        return;
+      if(!data||!data.length){
+        lyricsScroll.innerHTML='<div class="lyric-none">😔 Sin letra disponible</div>'; return;
       }
-      // Buscar la que tenga syncedLyrics (con timestamps LRC)
-      var synced = null;
-      for(var i=0;i<data.length;i++){
-        if(data[i].syncedLyrics){ synced=data[i].syncedLyrics; break; }
-      }
+      var synced=null;
+      for(var i=0;i<data.length;i++){ if(data[i].syncedLyrics){synced=data[i].syncedLyrics;break;} }
       if(synced){
-        lrcLines = parseLRC(synced);
-        renderLyrics();
-        updateActiveLine(audio.currentTime);
+        lrcLines=parseLRC(synced); renderLyrics(); updateActiveLine(audio.currentTime);
       } else {
-        // Fallback: letra plana sin sync
-        var plain = data[0].plainLyrics || '';
+        var plain=data[0].plainLyrics||'';
         if(plain){
-          var html='<div style="height:20px"></div>';
-          plain.split('\n').forEach(function(line){
-            if(line.trim()) html+='<div class="lyric-line" style="color:rgba(248,250,252,.7)">'+escapeHtml(line)+'</div>';
-            else html+='<div style="height:12px"></div>';
+          var h='<div style="height:30px"></div>';
+          plain.split('\n').forEach(function(l){
+            h+=l.trim()?'<div class="lyric-line" style="color:rgba(255,255,255,.65)">'+esc(l)+'</div>':'<div style="height:10px"></div>';
           });
-          lyricsScroll.innerHTML=html;
+          lyricsScroll.innerHTML=h;
         } else {
-          lyricsScroll.innerHTML='<div class="lyric-none">😔 No se encontró letra para esta canción.</div>';
+          lyricsScroll.innerHTML='<div class="lyric-none">😔 Sin letra disponible</div>';
         }
       }
-    })
-    .catch(function(){
-      lyricsScroll.innerHTML='<div class="lyric-none">⚠️ Error al cargar la letra. Revisa tu conexión.</div>';
+    }).catch(function(){
+      lyricsScroll.innerHTML='<div class="lyric-none">⚠️ Error al cargar la letra</div>';
     });
 }
 
-lyricsBtn.addEventListener('click', function(e){
-  e.stopPropagation();
-  unlocked=true;
-  lyricsVisible = !lyricsVisible;
-
+lyricsBtn.addEventListener('click',function(e){
+  e.stopPropagation(); unlocked=true;
+  lyricsVisible=!lyricsVisible;
   if(lyricsVisible){
-    // Mostrar letras: atenuar tocadiscos
-    vinylView.classList.add('dimmed');
-    lyricsPanel.classList.add('visible');
+    lyricsOverlay.classList.add('visible');
     lyricsBtn.classList.add('active');
-    lyricsBtn.style.textShadow='0 0 12px #38bdf8';
     fetchLyrics();
   } else {
-    // Ocultar letras: restaurar tocadiscos
-    vinylView.classList.remove('dimmed');
-    lyricsPanel.classList.remove('visible');
+    lyricsOverlay.classList.remove('visible');
     lyricsBtn.classList.remove('active');
-    lyricsBtn.style.textShadow='';
   }
 });
 
-function fmt(s){
-  if(isNaN(s)||!isFinite(s))return'0:00';
-  var m=Math.floor(s/60),sec=Math.floor(s%60);
-  return m+':'+(sec<10?'0':'')+sec;
-}
+closeLyricsBtn.addEventListener('click',function(e){
+  e.stopPropagation();
+  lyricsVisible=false;
+  lyricsOverlay.classList.remove('visible');
+  lyricsBtn.classList.remove('active');
+});
 </script>
 </body>
 </html>
