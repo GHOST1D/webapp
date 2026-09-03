@@ -1,272 +1,427 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Musik Ghost Player WebApp</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        html, body {
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-            touch-action: none;
-            background: linear-gradient(135deg, #020617 0%, #0f172a 50%, #020617 100%);
-            color: #f8fafc;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-        .glass {
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(56, 189, 248, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-        }
-        .vinyl-spin {
-            animation: spin 8s linear infinite;
-        }
-        @keyframes spin {
-            100% { transform: rotate(360deg); }
-        }
-        .paused {
-            animation-play-state: paused !important;
-        }
-        .tonearm-transition {
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            transform-origin: 85% 15%;
-        }
-        .neon-blue-glow {
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
-        }
-        .red-pulsing-dot {
-            box-shadow: 0 0 10px #ef4444, 0 0 20px #ef4444;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>GHOST1D Player</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;width:100%;overflow:hidden;touch-action:none;
+background:linear-gradient(160deg,#020617 0%,#0f172a 60%,#020617 100%);
+color:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+display:flex;flex-direction:column;align-items:center;}
+
+#app{width:100%;max-width:420px;height:100%;display:flex;flex-direction:column;
+justify-content:space-between;padding:12px 14px 10px;}
+
+/* HEADER */
+header{display:flex;justify-content:space-between;align-items:center;padding:4px 0;flex-shrink:0;}
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;color:#38bdf8;letter-spacing:.5px;}
+.redled{position:relative;display:flex;align-items:center;justify-content:center;width:14px;height:14px;}
+.redled-ping{position:absolute;width:14px;height:14px;border-radius:50%;background:#ef4444;opacity:.5;animation:ping 1.4s ease-in-out infinite;}
+.redled-dot{position:relative;width:10px;height:10px;border-radius:50%;background:#dc2626;box-shadow:0 0 10px #ef4444,0 0 20px #ef4444;}
+@keyframes ping{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.6);opacity:0}}
+.badge{font-size:10px;padding:3px 10px;border-radius:99px;background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.35);color:#7dd3fc;font-family:monospace;letter-spacing:1px;}
+
+/* MAIN AREA */
+main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;position:relative;}
+
+/* ───── TOCADISCOS ───── */
+#vinylView{display:flex;flex-direction:column;align-items:center;justify-content:center;
+width:100%;transition:opacity .5s,filter .5s;}
+#vinylView.dimmed{opacity:.25;filter:blur(2px);pointer-events:none;}
+
+.turntable{position:relative;width:220px;height:220px;display:flex;align-items:center;justify-content:center;}
+
+.tonearm{position:absolute;top:-16px;right:4px;width:60px;height:120px;
+transform-origin:84% 14%;transform:rotate(-32deg);transition:transform .6s cubic-bezier(.4,0,.2,1);z-index:20;}
+.tonearm-pivot{position:absolute;top:2px;right:2px;width:26px;height:26px;border-radius:50%;
+background:linear-gradient(135deg,#475569,#64748b);border:2px solid rgba(56,189,248,.5);
+display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px rgba(56,189,248,.3);}
+.tonearm-pivot-dot{width:8px;height:8px;border-radius:50%;background:#38bdf8;box-shadow:0 0 6px #38bdf8;}
+.tonearm-arm{position:absolute;top:20px;right:14px;width:5px;height:90px;
+background:linear-gradient(180deg,#cbd5e1,#f8fafc,#94a3b8);border-radius:3px;}
+.tonearm-head{position:absolute;bottom:2px;right:10px;width:14px;height:26px;
+background:#0f172a;border:1px solid #38bdf8;border-radius:3px;
+display:flex;align-items:flex-end;justify-content:center;padding-bottom:3px;}
+.tonearm-needle{width:5px;height:7px;border-radius:50%;background:#ef4444;
+box-shadow:0 0 8px #ef4444,0 0 16px #ef4444;animation:npulse 1.2s ease-in-out infinite;}
+@keyframes npulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+#vinylDisk{position:absolute;width:190px;height:190px;border-radius:50%;
+background:#0a0a1a;border:4px solid #1e293b;display:flex;align-items:center;justify-content:center;
+box-shadow:0 0 40px rgba(0,0,0,.8);}
+#vinylDisk.spinning{animation:spin 8s linear infinite;}
+@keyframes spin{100%{transform:rotate(360deg)}}
+.vinyl-ring1{position:absolute;inset:8px;border-radius:50%;border:1px solid rgba(56,189,248,.1);}
+.vinyl-ring2{position:absolute;inset:18px;border-radius:50%;border:1px solid rgba(56,189,248,.07);}
+.vinyl-ring3{position:absolute;inset:30px;border-radius:50%;border:1px solid rgba(56,189,248,.05);}
+.vinyl-center{width:60px;height:60px;border-radius:50%;
+background:linear-gradient(135deg,#0ea5e9,#3b82f6,#38bdf8);border:3px solid #0a0a1a;
+display:flex;align-items:center;justify-content:center;
+box-shadow:0 0 20px rgba(56,189,248,.5),0 0 40px rgba(56,189,248,.2);}
+.vinyl-hole{width:12px;height:12px;border-radius:50%;background:#0a0a1a;}
+
+#coverArt{position:relative;z-index:10;width:140px;height:140px;border-radius:16px;
+object-fit:cover;border:2px solid rgba(56,189,248,.4);
+box-shadow:0 0 20px rgba(56,189,248,.4),0 8px 32px rgba(0,0,0,.6);}
+
+.meta{text-align:center;margin-top:14px;padding:0 8px;}
+#songTitle{font-size:17px;font-weight:700;color:#f8fafc;
+white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px;}
+#songArtist{font-size:12px;color:rgba(56,189,248,.8);margin-top:3px;
+white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;}
+
+/* ───── PANEL DE LETRAS (Shazam style) ───── */
+#lyricsPanel{
+  position:absolute;inset:0;
+  display:none;flex-direction:column;align-items:center;
+  overflow:hidden;padding:8px 6px 0;
+}
+#lyricsPanel.visible{display:flex;}
+
+#lyricsScroll{
+  width:100%;flex:1;overflow-y:auto;overflow-x:hidden;
+  padding:20px 8px 40px;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+  scroll-behavior:smooth;
+}
+#lyricsScroll::-webkit-scrollbar{display:none;}
+
+.lyric-line{
+  text-align:center;
+  font-size:16px;
+  font-weight:600;
+  color:rgba(148,163,184,.45);
+  padding:9px 4px;
+  line-height:1.5;
+  transition:color .35s, font-size .35s, text-shadow .35s;
+  cursor:default;
+}
+.lyric-line.active{
+  color:#f8fafc;
+  font-size:19px;
+  text-shadow:0 0 20px rgba(56,189,248,.8),0 0 40px rgba(56,189,248,.4);
+}
+.lyric-line.past{
+  color:rgba(148,163,184,.25);
+}
+.lyric-loading{
+  text-align:center;color:rgba(56,189,248,.6);font-size:13px;padding:40px 0;
+  animation:fadeInOut 1.5s ease-in-out infinite;
+}
+@keyframes fadeInOut{0%,100%{opacity:.4}50%{opacity:1}}
+.lyric-none{text-align:center;color:rgba(148,163,184,.5);font-size:13px;padding:40px 16px;line-height:1.8;}
+
+/* FOOTER */
+footer{flex-shrink:0;background:rgba(15,23,42,.85);backdrop-filter:blur(20px);
+border:1px solid rgba(56,189,248,.15);border-radius:20px;padding:12px 14px 12px;margin-bottom:4px;
+box-shadow:0 8px 32px rgba(0,0,0,.5);}
+
+.progress-row{margin-bottom:6px;}
+#seekBar{width:100%;height:4px;appearance:none;background:#1e293b;border-radius:4px;cursor:pointer;outline:none;}
+#seekBar::-webkit-slider-thumb{appearance:none;width:14px;height:14px;border-radius:50%;background:#38bdf8;box-shadow:0 0 8px #38bdf8;cursor:pointer;}
+.times{display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:rgba(125,211,252,.8);font-family:monospace;}
+
+.controls{display:flex;justify-content:space-between;align-items:center;padding:0 4px;}
+.ctrl-btn{background:none;border:none;cursor:pointer;color:#94a3b8;font-size:18px;padding:4px 6px;transition:color .2s;}
+.ctrl-btn:hover,.ctrl-btn.active{color:#38bdf8;}
+#playBtn{width:50px;height:50px;border-radius:50%;border:none;cursor:pointer;
+background:linear-gradient(135deg,#0ea5e9,#3b82f6);
+display:flex;align-items:center;justify-content:center;
+box-shadow:0 0 20px rgba(56,189,248,.5),0 4px 15px rgba(0,0,0,.4);
+transition:transform .1s;font-size:20px;color:#020617;font-weight:900;}
+#playBtn:active{transform:scale(.92);}
+#lyricsBtn{font-size:15px;}
+</style>
 </head>
-<body class="h-full flex flex-col justify-between p-3 max-w-md mx-auto select-none overflow-hidden">
-    
-    <!-- Elemento Audio HTML5 para Reproducción Real -->
-    <audio id="audioPlayer" preload="auto"></audio>
+<body>
+<audio id="audioPlayer" preload="auto"></audio>
 
-    <!-- Header -->
-    <header class="flex justify-between items-center py-1">
-        <div class="flex items-center space-x-2">
-            <!-- Punto Rojo Pulsante Neón -->
-            <div class="relative flex items-center justify-center">
-                <span class="absolute inline-flex h-3 w-3 rounded-full bg-red-500 opacity-75 animate-ping"></span>
-                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600 red-pulsing-dot"></span>
-            </div>
-            <span class="text-cyan-400 font-bold text-base tracking-wide"><i class="fa-solid fa-bolt mr-1 text-cyan-300"></i> GHOST1D Player</span>
+<div id="app">
+  <header>
+    <div class="logo">
+      <div class="redled"><div class="redled-ping"></div><div class="redled-dot"></div></div>
+      ⚡ GHOST1D Player
+    </div>
+    <div class="badge">NEON V2.0</div>
+  </header>
+
+  <main>
+    <!-- Vista del Tocadiscos -->
+    <div id="vinylView">
+      <div class="turntable">
+        <div class="tonearm" id="tonearm">
+          <div class="tonearm-pivot"><div class="tonearm-pivot-dot"></div></div>
+          <div class="tonearm-arm"></div>
+          <div class="tonearm-head"><div class="tonearm-needle"></div></div>
         </div>
-        <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 font-mono tracking-wider">NEON V2.0</span>
-    </header>
-
-    <!-- Album Art, Vinyl & Turntable Tonearm View -->
-    <main class="flex-1 flex flex-col items-center justify-center my-2 overflow-hidden">
-        <div class="relative w-56 h-56 sm:w-64 sm:h-64 flex items-center justify-center">
-            
-            <!-- Aguja del Tocadiscos (Tonearm) -->
-            <div id="tonearm" class="absolute -top-4 right-2 z-30 w-16 h-32 tonearm-transition transform rotate-[-30deg]">
-                <div class="absolute top-1 right-1 w-7 h-7 rounded-full bg-gradient-to-tr from-slate-800 to-slate-600 border-2 border-cyan-400/50 shadow-xl flex items-center justify-center">
-                    <div class="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#38bdf8]"></div>
-                </div>
-                <div class="absolute top-5 right-3.5 w-1.5 h-24 bg-gradient-to-b from-slate-400 via-cyan-100 to-slate-500 rounded-full shadow-lg"></div>
-                <div class="absolute bottom-1 right-2.5 w-4 h-7 bg-slate-950 border border-cyan-400 rounded-sm shadow-md flex flex-col items-center justify-end">
-                    <div class="w-1.5 h-2 bg-red-500 rounded-full animate-pulse red-pulsing-dot"></div>
-                </div>
-            </div>
-
-            <!-- Vinyl Disk Background -->
-            <div id="vinylDisk" class="absolute w-48 h-48 sm:w-56 sm:h-56 rounded-full bg-slate-950 border-4 border-slate-800 flex items-center justify-center shadow-2xl vinyl-spin paused">
-                <div class="absolute inset-2 rounded-full border border-cyan-900/30"></div>
-                <div class="absolute inset-5 rounded-full border border-cyan-800/20"></div>
-                <div class="absolute inset-8 rounded-full border border-cyan-800/10"></div>
-                
-                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr from-cyan-600 via-blue-500 to-cyan-400 border-4 border-slate-900 flex items-center justify-center z-0 shadow-[0_0_15px_rgba(56,189,248,0.4)]">
-                    <div class="w-3.5 h-3.5 rounded-full bg-slate-950"></div>
-                </div>
-            </div>
-
-            <!-- Cover Art Over con Borde Azul Neón -->
-            <img id="coverArt" src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&auto=format&fit=crop" 
-                 class="relative z-10 w-36 h-36 sm:w-44 sm:h-44 rounded-2xl object-cover shadow-2xl border-2 border-cyan-400/40 transition-all duration-300 transform hover:scale-105 neon-blue-glow">
+        <div id="vinylDisk">
+          <div class="vinyl-ring1"></div><div class="vinyl-ring2"></div><div class="vinyl-ring3"></div>
+          <div class="vinyl-center"><div class="vinyl-hole"></div></div>
         </div>
+        <img id="coverArt" src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300&q=80" alt="cover">
+      </div>
+      <div class="meta">
+        <div id="songTitle">Cargando canción...</div>
+        <div id="songArtist">GHOST1D_Solutions Catalog</div>
+      </div>
+    </div>
 
-        <!-- Song Metadata -->
-        <div class="text-center mt-4 px-2">
-            <h2 id="songTitle" class="text-lg font-bold text-white truncate max-w-[280px]">Cargando canción...</h2>
-            <p id="songArtist" class="text-cyan-400/80 text-xs mt-0.5 truncate max-w-[260px] font-medium">GHOST1D_Solutions Catalog</p>
-        </div>
-    </main>
+    <!-- Panel de Letras Sincronizadas (Shazam style) -->
+    <div id="lyricsPanel">
+      <div id="lyricsScroll">
+        <div class="lyric-loading">🎤 Buscando letra...</div>
+      </div>
+    </div>
+  </main>
 
-    <!-- Controls & Progress -->
-    <footer class="glass rounded-2xl p-4 mb-1 space-y-3">
-        <!-- Progress Bar -->
-        <div class="space-y-1">
-            <input type="range" id="seekBar" value="0" max="100" class="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400">
-            <div class="flex justify-between text-[11px] text-cyan-300/80 font-mono">
-                <span id="currentTime">0:00</span>
-                <span id="durationTime">0:00</span>
-            </div>
-        </div>
+  <footer>
+    <div class="progress-row">
+      <input type="range" id="seekBar" value="0" max="100">
+      <div class="times"><span id="currentTime">0:00</span><span id="durationTime">0:00</span></div>
+    </div>
+    <div class="controls">
+      <button class="ctrl-btn" id="lyricsBtn" title="Ver Letra">🎤</button>
+      <button class="ctrl-btn">⏮</button>
+      <button id="playBtn">▶</button>
+      <button class="ctrl-btn">⏭</button>
+      <button class="ctrl-btn accent">↺</button>
+    </div>
+  </footer>
+</div>
 
-        <!-- Buttons Row Azul Neón -->
-        <div class="flex justify-between items-center px-2">
-            <button class="text-slate-400 hover:text-cyan-400 transition"><i class="fa-solid fa-shuffle text-base"></i></button>
-            <button class="text-slate-200 hover:text-cyan-400 text-lg transition"><i class="fa-solid fa-backward-step"></i></button>
-            <button id="playBtn" class="w-12 h-12 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 flex items-center justify-center text-lg font-bold shadow-lg neon-blue-glow transition transform active:scale-95">
-                <i class="fa-solid fa-play ml-0.5 text-slate-950"></i>
-            </button>
-            <button class="text-slate-200 hover:text-cyan-400 text-lg transition"><i class="fa-solid fa-forward-step"></i></button>
-            <button class="text-cyan-400 hover:text-cyan-300 transition"><i class="fa-solid fa-repeat text-base"></i></button>
-        </div>
-    </footer>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+try { Telegram.WebApp.ready(); Telegram.WebApp.expand(); } catch(e){}
 
-    <script>
-        // NOTIFICAR A TELEGRAM DE INMEDIATO QUE LA WEBAPP ESTÁ LISTA (Evita la pantalla de carga infinita)
-        const tg = window.Telegram?.WebApp;
-        if (tg) {
-            try {
-                tg.ready();
-                tg.expand();
-            } catch(e) { console.log(e); }
-        }
+var audio    = document.getElementById('audioPlayer');
+var vinyl    = document.getElementById('vinylDisk');
+var tonearm  = document.getElementById('tonearm');
+var playBtn  = document.getElementById('playBtn');
+var coverArt = document.getElementById('coverArt');
+var titleEl  = document.getElementById('songTitle');
+var artistEl = document.getElementById('songArtist');
+var seekBar  = document.getElementById('seekBar');
+var currEl   = document.getElementById('currentTime');
+var durEl    = document.getElementById('durationTime');
+var lyricsBtn   = document.getElementById('lyricsBtn');
+var lyricsPanel = document.getElementById('lyricsPanel');
+var lyricsScroll= document.getElementById('lyricsScroll');
+var vinylView   = document.getElementById('vinylView');
 
-        const audio = document.getElementById('audioPlayer');
-        const vinyl = document.getElementById('vinylDisk');
-        const tonearm = document.getElementById('tonearm');
-        const playBtn = document.getElementById('playBtn');
-        const coverArt = document.getElementById('coverArt');
-        const songTitle = document.getElementById('songTitle');
-        const songArtist = document.getElementById('songArtist');
-        const seekBar = document.getElementById('seekBar');
-        const currentTimeEl = document.getElementById('currentTime');
-        const durationTimeEl = document.getElementById('durationTime');
+// ── Parámetros ─────────────────────────────────────────────────────────────
+function getParam(k){
+  try{
+    var s=new URLSearchParams(window.location.search);
+    if(s.has(k))return s.get(k);
+    var h=new URLSearchParams(window.location.hash.substring(1));
+    if(h.has(k))return h.get(k);
+  }catch(e){}
+  return null;
+}
 
-        function getParam(key) {
-            try {
-                const searchParams = new URLSearchParams(window.location.search);
-                if (searchParams.has(key)) return searchParams.get(key);
-                const hashParams = new URLSearchParams(window.location.hash.substring(1));
-                if (hashParams.has(key)) return hashParams.get(key);
-            } catch(e) {}
-            return null;
-        }
+var titleP  = getParam('title');
+var artistP = getParam('artist');
+var audioP  = getParam('audio');
 
-        const rawStartParam = tg?.initDataUnsafe?.start_param || getParam('startapp') || getParam('tgWebAppStartParam');
-        const titleParam = getParam('title');
-        const artistParam = getParam('artist');
+var titleStr  = titleP  ? decodeURIComponent(titleP)  : '';
+var artistStr = artistP ? decodeURIComponent(artistP) : '';
 
-        let searchQuery = "";
+if(titleStr)  titleEl.innerText  = titleStr;
+if(artistStr) artistEl.innerText = artistStr;
 
-        if (titleParam) {
-            searchQuery = decodeURIComponent(titleParam) + " " + (artistParam ? decodeURIComponent(artistParam) : "");
-            songTitle.innerText = decodeURIComponent(titleParam);
-            if (artistParam) songArtist.innerText = decodeURIComponent(artistParam);
-        } else if (rawStartParam) {
-            let cleanQuery = rawStartParam.replace(/_/g, " ");
-            searchQuery = cleanQuery;
-            songTitle.innerText = cleanQuery;
-            songArtist.innerText = "GHOST1D_Solutions Catalog";
+// ── Cargar Audio ────────────────────────────────────────────────────────────
+function loadAudio(src){ audio.src=src; audio.load(); }
+
+if(audioP){
+  loadAudio(decodeURIComponent(audioP));
+} else if(titleStr){
+  fetch('https://itunes.apple.com/search?term='+encodeURIComponent(titleStr+' '+artistStr)+'&entity=song&limit=1')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.results&&d.results.length>0){
+        var t=d.results[0];
+        if(!titleStr)  titleEl.innerText  = t.trackName;
+        if(!artistStr) artistEl.innerText = t.artistName;
+        if(t.artworkUrl100) coverArt.src  = t.artworkUrl100.replace('100x100bb','500x500bb');
+        if(t.previewUrl) loadAudio(t.previewUrl);
+      }
+    }).catch(function(){});
+}
+
+// ── Tocadiscos ──────────────────────────────────────────────────────────────
+function setPlaying(p){
+  if(p){ vinyl.classList.add('spinning'); tonearm.style.transform='rotate(0deg)'; playBtn.innerText='⏸'; }
+  else { vinyl.classList.remove('spinning'); tonearm.style.transform='rotate(-32deg)'; playBtn.innerText='▶'; }
+}
+
+var unlocked=false;
+function unlock(){
+  if(unlocked)return; unlocked=true;
+  if(audio.src&&audio.paused) audio.play().then(function(){setPlaying(true);}).catch(function(){});
+}
+document.addEventListener('touchstart',unlock,{once:true});
+document.addEventListener('click',unlock,{once:true});
+
+audio.addEventListener('play',  function(){setPlaying(true);});
+audio.addEventListener('pause', function(){setPlaying(false);});
+audio.addEventListener('ended', function(){setPlaying(false);seekBar.value=0;currEl.innerText='0:00';});
+audio.addEventListener('timeupdate', function(){
+  if(audio.duration){
+    seekBar.value=(audio.currentTime/audio.duration)*100;
+    currEl.innerText=fmt(audio.currentTime);
+    durEl.innerText=fmt(audio.duration);
+    if(lyricsVisible) updateActiveLine(audio.currentTime);
+  }
+});
+audio.addEventListener('loadedmetadata',function(){durEl.innerText=fmt(audio.duration);});
+
+seekBar.addEventListener('input',function(){
+  if(audio.duration) audio.currentTime=(seekBar.value/100)*audio.duration;
+});
+
+playBtn.addEventListener('click',function(e){
+  e.stopPropagation(); unlocked=true;
+  if(!audio.src)return;
+  if(audio.paused) audio.play().then(function(){setPlaying(true);}).catch(function(){});
+  else { audio.pause(); setPlaying(false); }
+});
+
+// ── Letras Sincronizadas (Shazam Style) ────────────────────────────────────
+var lyricsVisible = false;
+var lrcLines = [];    // [{time: segundos, text: string}]
+var lyricsLoaded = false;
+var currentLineIndex = -1;
+
+function parseLRC(lrcText){
+  var lines = [];
+  var re = /\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/;
+  lrcText.split('\n').forEach(function(line){
+    var m = line.match(re);
+    if(m){
+      var secs = parseInt(m[1])*60 + parseInt(m[2]) + parseInt(m[3])/1000;
+      var text = m[4].trim();
+      if(text) lines.push({time: secs, text: text});
+    }
+  });
+  return lines.sort(function(a,b){return a.time-b.time;});
+}
+
+function renderLyrics(){
+  if(lrcLines.length===0){
+    lyricsScroll.innerHTML='<div class="lyric-none">😔 No se encontró letra sincronizada para esta canción.<br><br>Disfruta la música 🎵</div>';
+    return;
+  }
+  var html='<div style="height:40px"></div>';
+  lrcLines.forEach(function(line, i){
+    html += '<div class="lyric-line" id="ll'+i+'" data-t="'+line.time+'">'+escapeHtml(line.text)+'</div>';
+  });
+  html += '<div style="height:80px"></div>';
+  lyricsScroll.innerHTML = html;
+}
+
+function escapeHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function updateActiveLine(currentTime){
+  if(lrcLines.length===0) return;
+  var newIdx = -1;
+  for(var i=0; i<lrcLines.length; i++){
+    if(lrcLines[i].time <= currentTime) newIdx = i;
+    else break;
+  }
+  if(newIdx === currentLineIndex) return;
+  currentLineIndex = newIdx;
+
+  // Actualizar clases
+  var all = lyricsScroll.querySelectorAll('.lyric-line');
+  all.forEach(function(el, i){
+    el.classList.remove('active','past');
+    if(i < currentLineIndex) el.classList.add('past');
+    else if(i === currentLineIndex) el.classList.add('active');
+  });
+
+  // Centrar la línea activa
+  if(currentLineIndex >= 0){
+    var activeEl = document.getElementById('ll'+currentLineIndex);
+    if(activeEl){
+      var scrollTarget = activeEl.offsetTop - (lyricsScroll.clientHeight/2) + (activeEl.clientHeight/2);
+      lyricsScroll.scrollTo({top: scrollTarget, behavior:'smooth'});
+    }
+  }
+}
+
+function fetchLyrics(){
+  if(lyricsLoaded) return;
+  lyricsLoaded = true;
+  lyricsScroll.innerHTML='<div class="lyric-loading">🎤 Buscando letra sincronizada...</div>';
+
+  var q = encodeURIComponent(titleStr + (artistStr?' '+artistStr:''));
+  fetch('https://lrclib.net/api/search?q='+q)
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(!data || data.length===0){
+        lyricsScroll.innerHTML='<div class="lyric-none">😔 No se encontró letra para esta canción.<br>Disfruta la música 🎵</div>';
+        return;
+      }
+      // Buscar la que tenga syncedLyrics (con timestamps LRC)
+      var synced = null;
+      for(var i=0;i<data.length;i++){
+        if(data[i].syncedLyrics){ synced=data[i].syncedLyrics; break; }
+      }
+      if(synced){
+        lrcLines = parseLRC(synced);
+        renderLyrics();
+        updateActiveLine(audio.currentTime);
+      } else {
+        // Fallback: letra plana sin sync
+        var plain = data[0].plainLyrics || '';
+        if(plain){
+          var html='<div style="height:20px"></div>';
+          plain.split('\n').forEach(function(line){
+            if(line.trim()) html+='<div class="lyric-line" style="color:rgba(248,250,252,.7)">'+escapeHtml(line)+'</div>';
+            else html+='<div style="height:12px"></div>';
+          });
+          lyricsScroll.innerHTML=html;
         } else {
-            songTitle.innerText = "Reproduciendo Pista";
-            songArtist.innerText = "GHOST1D_Solutions Catalog";
+          lyricsScroll.innerHTML='<div class="lyric-none">😔 No se encontró letra para esta canción.</div>';
         }
+      }
+    })
+    .catch(function(){
+      lyricsScroll.innerHTML='<div class="lyric-none">⚠️ Error al cargar la letra. Revisa tu conexión.</div>';
+    });
+}
 
-        // Búsqueda asíncrona no bloqueante de Carátula HD y Audio
-        if (searchQuery) {
-            fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(searchQuery)}&entity=song&limit=1`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.results && data.results.length > 0) {
-                        const track = data.results[0];
-                        songTitle.innerText = track.trackName;
-                        songArtist.innerText = track.artistName;
-                        
-                        if (track.artworkUrl100) {
-                            coverArt.src = track.artworkUrl100.replace('100x100bb', '500x500bb');
-                        }
-                        
-                        if (track.previewUrl) {
-                            audio.src = track.previewUrl;
-                            audio.load();
-                        }
-                    }
-                })
-                .catch(err => console.log("Search error:", err));
-        }
+lyricsBtn.addEventListener('click', function(e){
+  e.stopPropagation();
+  unlocked=true;
+  lyricsVisible = !lyricsVisible;
 
-        function formatTime(seconds) {
-            if (isNaN(seconds)) return "0:00";
-            const mins = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-        }
+  if(lyricsVisible){
+    // Mostrar letras: atenuar tocadiscos
+    vinylView.classList.add('dimmed');
+    lyricsPanel.classList.add('visible');
+    lyricsBtn.classList.add('active');
+    lyricsBtn.style.textShadow='0 0 12px #38bdf8';
+    fetchLyrics();
+  } else {
+    // Ocultar letras: restaurar tocadiscos
+    vinylView.classList.remove('dimmed');
+    lyricsPanel.classList.remove('visible');
+    lyricsBtn.classList.remove('active');
+    lyricsBtn.style.textShadow='';
+  }
+});
 
-        function setTurntablePlayingState(playing) {
-            if (playing) {
-                vinyl.classList.remove('paused');
-                tonearm.style.transform = 'rotate(0deg)';
-                playBtn.innerHTML = '<i class="fa-solid fa-pause text-slate-950"></i>';
-            } else {
-                vinyl.classList.add('paused');
-                tonearm.style.transform = 'rotate(-30deg)';
-                playBtn.innerHTML = '<i class="fa-solid fa-play ml-0.5 text-slate-950"></i>';
-            }
-        }
-
-        function unlockAudioOnGesture() {
-            if (audio.src && audio.paused) {
-                audio.play().then(() => {
-                    setTurntablePlayingState(true);
-                }).catch(e => console.log(e));
-            }
-        }
-        document.addEventListener('click', unlockAudioOnGesture, { once: true });
-        document.addEventListener('touchstart', unlockAudioOnGesture, { once: true });
-
-        audio.addEventListener('timeupdate', () => {
-            if (audio.duration) {
-                const pct = (audio.currentTime / audio.duration) * 100;
-                seekBar.value = pct;
-                currentTimeEl.innerText = formatTime(audio.currentTime);
-                durationTimeEl.innerText = formatTime(audio.duration);
-            }
-        });
-
-        audio.addEventListener('loadedmetadata', () => {
-            durationTimeEl.innerText = formatTime(audio.duration);
-        });
-
-        audio.addEventListener('ended', () => {
-            setTurntablePlayingState(false);
-            seekBar.value = 0;
-            currentTimeEl.innerText = "0:00";
-        });
-
-        seekBar.addEventListener('input', () => {
-            if (audio.duration) {
-                audio.currentTime = (seekBar.value / 100) * audio.duration;
-            }
-        });
-
-        playBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (audio.src) {
-                if (audio.paused) {
-                    audio.play().then(() => {
-                        setTurntablePlayingState(true);
-                    });
-                } else {
-                    audio.pause();
-                    setTurntablePlayingState(false);
-                }
-            } else {
-                const isPaused = vinyl.classList.contains('paused');
-                setTurntablePlayingState(isPaused);
-            }
-        });
-    </script>
+function fmt(s){
+  if(isNaN(s)||!isFinite(s))return'0:00';
+  var m=Math.floor(s/60),sec=Math.floor(s%60);
+  return m+':'+(sec<10?'0':'')+sec;
+}
+</script>
 </body>
 </html>
