@@ -422,6 +422,39 @@ var plP    = getParam('pl');
 var piP    = getParam('pi');
 
 var titleStr  = titleP  ? decodeURIComponent(titleP)  : '';
+var artistStr = artistP ? decodeURIComponent(artistP) : '';
+var audioStr  = audioP  ? decodeURIComponent(audioP)  : '';
+var playlist  = [];
+var playlistIdx = 0;
+
+if(plP){
+  try{ playlist = JSON.parse(decodeURIComponent(plP)); }catch(e){}
+}
+if(piP){
+  try{ playlistIdx = parseInt(piP) || 0; }catch(e){}
+}
+
+function esc(s){
+  if(!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fmt(s, isMinus){
+  if(isNaN(s) || s < 0) return '0:00';
+  var m = Math.floor(s / 60);
+  var sec = Math.floor(s % 60);
+  var str = m + ':' + (sec < 10 ? '0' : '') + sec;
+  return isMinus ? '-' + str : str;
+}
+
+function setPlaying(p){
+  if(p){
+    playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+  } else {
+    playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+  }
+}
+
 // ── Media Session API — Controles en pantalla bloqueada ───────────────────
 var currentCoverUrl = '';
 function updateMediaSession(){
