@@ -212,6 +212,21 @@ footer{display:flex;justify-content:space-between;align-items:center;padding:0 8
 .fav-btn:active{opacity:.7;}
 .fav-cancel{background:rgba(255,255,255,.12);color:#fff;}
 .fav-confirm{background:#38bdf8;color:#000;}
+.fav-pl-card{
+  display:flex;align-items:center;gap:10px;padding:12px 16px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);
+  border-radius:14px;cursor:pointer;transition:background .15s, transform .1s;
+}
+.fav-pl-card:active{background:rgba(56,189,248,.25);transform:scale(0.98);}
+.play-all-btn{
+  width:100%;padding:13px;border-radius:14px;border:none;
+  background:linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+  color:#fff;font-size:15px;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 4px 16px rgba(56,189,248,.35);
+  transition:transform .1s, opacity .15s;
+}
+.play-all-btn:active{transform:scale(.98);opacity:.85;}
 </style>
 </head>
 <body>
@@ -241,31 +256,46 @@ footer{display:flex;justify-content:space-between;align-items:center;padding:0 8
 </div>
 
 <!-- ── PANEL MIS PLAYLISTS (⭐ guardadas) ── -->
-<div id="myPlaylistsPanel" style="position:fixed;inset:0;z-index:55;display:none;flex-direction:column;background:rgba(0,0,0,.9);backdrop-filter:blur(24px);">
+<div id="myPlaylistsPanel" style="position:fixed;inset:0;z-index:55;display:none;flex-direction:column;background:rgba(0,0,0,.92);backdrop-filter:blur(24px);">
   <!-- Vista: lista de playlists -->
   <div id="mpListView" style="display:flex;flex-direction:column;height:100%;">
     <div style="padding:20px 26px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.08);">
       <div>
         <div style="font-size:11px;opacity:.45;letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px;">⭐ Mis Playlists</div>
-        <div style="font-size:16px;font-weight:700;">Playlists guardadas</div>
+        <div style="font-size:17px;font-weight:700;">Tus Playlists</div>
       </div>
       <button class="panel-close" id="closeMpBtn">✕</button>
     </div>
-    <div id="mpListScroll" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:10px 0 30px;"></div>
+    <div style="padding:12px 26px 6px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:12px;opacity:.55;text-transform:uppercase;letter-spacing:.5px;">Colecciones</span>
+      <button id="mpCreateNewBtn" style="background:rgba(56,189,248,.18);border:1px solid rgba(56,189,248,.45);color:#38bdf8;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;">+ Nueva Playlist</button>
+    </div>
+    <div id="mpCreateRow" style="display:none;padding:10px 26px 14px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.08);">
+      <div style="display:flex;gap:8px;">
+        <input id="mpNewPlInput" class="fav-input" placeholder="Nombre de la nueva playlist..." style="padding:9px 13px;font-size:13px;flex:1;" maxlength="40">
+        <button id="mpNewPlSave" style="background:#38bdf8;color:#000;border:none;border-radius:12px;padding:9px 15px;font-weight:700;font-size:13px;cursor:pointer;">Crear</button>
+        <button id="mpNewPlCancel" style="background:rgba(255,255,255,.12);color:#fff;border:none;border-radius:12px;padding:9px 13px;font-size:13px;cursor:pointer;">✕</button>
+      </div>
+    </div>
+    <div id="mpListScroll" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:6px 0 30px;"></div>
   </div>
   <!-- Vista: canciones de una playlist -->
   <div id="mpSongsView" style="display:none;flex-direction:column;height:100%;">
     <div style="padding:20px 26px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.08);">
       <div style="display:flex;align-items:center;gap:12px;">
-        <button style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,.65);font-size:20px;padding:0;" id="mpBackBtn">‹</button>
+        <button style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,.75);font-size:24px;padding:0;line-height:1;" id="mpBackBtn">‹</button>
         <div>
           <div style="font-size:11px;opacity:.45;letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px;">⭐ Playlist</div>
-          <div style="font-size:16px;font-weight:700;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="mpSongsTitle">–</div>
+          <div style="font-size:16px;font-weight:700;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="mpSongsTitle">–</div>
         </div>
       </div>
-      <button class="panel-close" id="closeMpSongsBtn">✕</button>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button id="mpDeletePlBtn" title="Eliminar playlist" style="background:none;border:none;color:#ef4444;font-size:15px;cursor:pointer;opacity:.8;padding:4px;">🗑️</button>
+        <button class="panel-close" id="closeMpSongsBtn">✕</button>
+      </div>
     </div>
-    <div id="mpSongsScroll" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:10px 0 30px;"></div>
+    <div id="mpPlayAllContainer" style="padding:14px 26px 6px;"></div>
+    <div id="mpSongsScroll" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:6px 0 30px;"></div>
   </div>
 </div>
 
@@ -273,13 +303,24 @@ footer{display:flex;justify-content:space-between;align-items:center;padding:0 8
 <!-- ── MODAL FAVORITOS ── -->
 <div id="favModal">
   <div class="fav-sheet">
-    <h3>⭐ Guardar en playlist</h3>
+    <h3 id="favModalTitle">⭐ Guardar en playlist</h3>
     <p id="favSongLabel">Agrega esta canción a una playlist personal</p>
-    <input class="fav-input" id="favInput" placeholder="Nombre de la playlist..." maxlength="40">
-    <div class="fav-existing" id="favExisting"></div>
+
+    <!-- Sección de playlists existentes -->
+    <div id="favExistingSection" style="margin-bottom:16px;">
+      <div style="font-size:12px;opacity:.65;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Tus Playlists (toca para guardar):</div>
+      <div id="favExisting" style="max-height:170px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;scrollbar-width:none;"></div>
+    </div>
+
+    <!-- Sección para crear una nueva -->
+    <div id="favNewSection">
+      <div style="font-size:12px;opacity:.65;margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;" id="favInputLabel">+ O crea una nueva playlist:</div>
+      <input class="fav-input" id="favInput" placeholder="Nombre de la playlist..." maxlength="40">
+    </div>
+
     <div class="fav-btns">
       <button class="fav-btn fav-cancel" id="favCancel">Cancelar</button>
-      <button class="fav-btn fav-confirm" id="favConfirm">Guardar ⭐</button>
+      <button class="fav-btn fav-confirm" id="favConfirm">Crear y Guardar ⭐</button>
     </div>
   </div>
 </div>
@@ -513,19 +554,60 @@ function updatePositionState(){
 }
 setupMediaSessionHandlers();
 
+// ── Playlists en LocalStorage & Helpers ─────────────────────────────────────
+var savedFavPlaylists = [];
+try{
+  var stored = localStorage.getItem('ghost1d_playlists');
+  if(stored) savedFavPlaylists = JSON.parse(stored);
+}catch(e){}
+
+function isSongSaved(t, a){
+  if(!t || t === "Selecciona una playlist o música") return false;
+  var lowT = t.toLowerCase().trim();
+  for(var i=0; i<savedFavPlaylists.length; i++){
+    var plKey = 'ghost1d_pl_songs_' + savedFavPlaylists[i];
+    try{
+      var sList = JSON.parse(localStorage.getItem(plKey) || '[]');
+      for(var j=0; j<sList.length; j++){
+        if(sList[j].t && sList[j].t.toLowerCase().trim() === lowT){
+          return true;
+        }
+      }
+    }catch(e){}
+  }
+  return false;
+}
+
+function updateStarIcon(){
+  if(!titleStr || titleStr === "Selecciona una playlist o música"){
+    starBtn.innerText = "⭐";
+    starBtn.classList.add("fav");
+    starBtn.title = "Ver tus playlists";
+  } else if(isSongSaved(titleStr, artistStr)){
+    starBtn.innerText = "⭐";
+    starBtn.classList.add("fav");
+    starBtn.title = "Guardada en playlist (toca para agregar a otra)";
+  } else {
+    starBtn.innerText = "☆";
+    starBtn.classList.remove("fav");
+    starBtn.title = "Guardar en playlist";
+  }
+}
+
 // ── Cargar y aplicar pista ─────────────────────────────────────────────────
-function applyTrack(title, artist, audioSrc){
+var _autoPlayPending = false;
+function applyTrack(title, artist, audioSrc, forcePlay){
   lyricsLoaded = false;
   lyricsVisible = false;
   lyricsOverlay.classList.remove('visible');
   lyricsBtn.classList.remove('active');
   lrcLines = []; currentLineIndex = -1;
-  starBtn.innerText = '☆'; starBtn.classList.remove('fav');
+  _autoPlayPending = !!forcePlay;
 
   if(title)  { titleEl.innerText  = title;  titleStr  = title;  }
   if(artist) { artistEl.innerText = artist; artistStr = artist; }
 
-  // Actualizar MediaSession con título/artista ya disponibles (sin carátula aún)
+  updateStarIcon();
   updateMediaSession();
 
   // Buscar carátula + preview en iTunes
@@ -543,18 +625,38 @@ function applyTrack(title, artist, audioSrc){
             bgFull.style.backgroundImage = 'url('+img+')';
             currentCoverUrl = img;
           }
-          if(!audioSrc && t.previewUrl){ audio.src=t.previewUrl; audio.load(); }
-          // Actualizar MediaSession con carátula real
+          if(!audioSrc && t.previewUrl){
+            audio.src = t.previewUrl;
+            audio.load();
+            if(_autoPlayPending){
+              _autoPlayPending = false;
+              audio.play().then(function(){setPlaying(true);}).catch(function(){});
+            }
+          }
           updateMediaSession();
         }
       }).catch(function(){});
   }
 
-  if(audioSrc){ audio.src=audioSrc; audio.load(); }
+  if(audioSrc){
+    audio.src = audioSrc;
+    audio.load();
+    if(_autoPlayPending){
+      _autoPlayPending = false;
+      audio.play().then(function(){setPlaying(true);}).catch(function(){});
+    }
+  }
 }
 
 // Carga inicial
-applyTrack(titleStr, artistStr, audioStr);
+if(titleStr){
+  applyTrack(titleStr, artistStr, audioStr);
+} else {
+  titleEl.innerText = "Selecciona una playlist o música";
+  artistEl.innerText = "Toca la ⭐ para ver tus playlists";
+  starBtn.innerText = "⭐";
+  starBtn.classList.add("fav");
+}
 
 // ── Desbloqueo Android ─────────────────────────────────────────────────────
 var unlocked=false;
@@ -564,7 +666,20 @@ document.addEventListener('click',unlock,{once:true});
 
 audio.addEventListener('play',  function(){setPlaying(true); updatePlActive();});
 audio.addEventListener('pause', function(){setPlaying(false);});
-audio.addEventListener('ended', function(){ setPlaying(false);seekBar.value=0;currEl.innerText='0:00';durEl.innerText='-0:00'; });
+audio.addEventListener('ended', function(){
+  setPlaying(false);
+  seekBar.value=0;
+  currEl.innerText='0:00';
+  durEl.innerText='-0:00';
+  // Reproducir de manera seguida todo su contenido
+  if(playlist && playlist.length > 0){
+    if(playlistIdx < playlist.length - 1){
+      navTo(playlistIdx + 1, true);
+    } else {
+      navTo(0, true); // Loop al inicio de la playlist
+    }
+  }
+});
 audio.addEventListener('timeupdate',function(){
   if(audio.duration){
     seekBar.value=(audio.currentTime/audio.duration)*100;
@@ -685,18 +800,20 @@ function updateNavBtns(){
 }
 updateNavBtns();
 
-function navTo(newIdx){
+function navTo(newIdx, forcePlay){
   if(newIdx<0||newIdx>=playlist.length)return;
   playlistIdx=newIdx;
   var item=playlist[newIdx];
-  var wasPlaying=!audio.paused;
-  applyTrack(item.t, item.a, '');
+  var wasPlaying = forcePlay || !audio.paused;
+  applyTrack(item.t, item.a, item.audio || '', wasPlaying);
   updateNavBtns();
   updatePlActive();
   if(wasPlaying){
     setTimeout(function(){
-      audio.play().then(function(){setPlaying(true);}).catch(function(){});
-    },500);
+      if(audio.src && audio.paused){
+        audio.play().then(function(){setPlaying(true);}).catch(function(){});
+      }
+    }, 450);
   }
 }
 
@@ -731,23 +848,15 @@ function renderPlaylist(){
   plScroll.querySelectorAll('.pl-item').forEach(function(el){
     el.addEventListener('click',function(){
       var i=parseInt(this.getAttribute('data-i'));
-      var wasPlaying=!audio.paused;
       playlistIdx=i;
       var item=playlist[i];
-      applyTrack(item.t,item.a,'');
+      applyTrack(item.t,item.a,item.audio||'',true);
       updateNavBtns();
       updatePlActive();
-      // Cerrar panel y reproducir
       playlistPanel.classList.remove('visible');
       playlistBtn.classList.remove('active');
-      if(wasPlaying){
-        setTimeout(function(){
-          audio.play().then(function(){setPlaying(true);}).catch(function(){});
-        },600);
-      }
     });
   });
-  // Scroll al item activo
   setTimeout(function(){
     var active=plScroll.querySelector('.pl-active');
     if(active)active.scrollIntoView({block:'center',behavior:'smooth'});
@@ -767,77 +876,122 @@ closePlBtn.addEventListener('click',function(e){
 });
 
 // ── Favoritos / Estrella ──────────────────────────────────────────────────
-var savedFavPlaylists = [];
-try{
-  var stored=localStorage.getItem('ghost1d_playlists');
-  if(stored) savedFavPlaylists=JSON.parse(stored);
-}catch(e){}
-
 function openFavModal(){
-  favSongLabel.innerText='"'+(titleStr||'?')+'" — '+(artistStr||'');
-  favInput.value='';
-  // Mostrar playlists previas como tags
-  if(savedFavPlaylists.length){
-    var h='';
-    savedFavPlaylists.forEach(function(n){
-      h+='<span class="fav-tag" data-n="'+esc(n)+'">'+esc(n)+'</span>';
+  favSongLabel.innerText = '"' + (titleStr||'?') + '" — ' + (artistStr||'');
+  favInput.value = '';
+  favInput.style.borderColor = '';
+
+  var favExistingSection = document.getElementById('favExistingSection');
+  var favInputLabel = document.getElementById('favInputLabel');
+  var favModalTitle = document.getElementById('favModalTitle');
+
+  if(savedFavPlaylists.length === 0){
+    // Caso: Primera playlist
+    if(favModalTitle) favModalTitle.innerText = "⭐ Crear tu primera Playlist";
+    if(favExistingSection) favExistingSection.style.display = 'none';
+    if(favInputLabel) favInputLabel.innerText = "Nombre de tu primera playlist:";
+    favConfirm.innerText = "Crear Playlist y Guardar ⭐";
+    favInput.placeholder = "Ej: Mis Favoritas, Fiesta, Rock...";
+  } else {
+    // Caso: Ya existen playlists
+    if(favModalTitle) favModalTitle.innerText = "⭐ Guardar en Playlist";
+    if(favExistingSection) favExistingSection.style.display = 'block';
+    if(favInputLabel) favInputLabel.innerText = "+ O crea una nueva playlist (sin límites):";
+    favConfirm.innerText = "Crear y Guardar ⭐";
+    favInput.placeholder = "Nombre de la nueva playlist...";
+
+    // Renderizar playlists existentes como tarjetas seleccionables
+    var h = '';
+    savedFavPlaylists.forEach(function(plName){
+      var plKey = 'ghost1d_pl_songs_' + plName;
+      var songs = [];
+      try{ var ss = localStorage.getItem(plKey); if(ss) songs = JSON.parse(ss); }catch(e){}
+      var alreadyIn = songs.some(function(s){
+        return s.t && s.t.toLowerCase().trim() === (titleStr||'').toLowerCase().trim();
+      });
+      h += '<div class="fav-pl-card" data-pl="' + esc(plName) + '">'
+        + '<span style="font-size:18px;">' + (alreadyIn ? '✅' : '⭐') + '</span>'
+        + '<div style="flex:1;overflow:hidden;">'
+          + '<div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(plName) + '</div>'
+          + '<div style="font-size:11px;opacity:.5;">' + songs.length + ' canción' + (songs.length !== 1 ? 'es' : '') + (alreadyIn ? ' • Ya agregada' : '') + '</div>'
+        + '</div>'
+        + '<span style="font-size:12px;color:#38bdf8;font-weight:600;">' + (alreadyIn ? 'Guardar +' : 'Guardar +') + '</span>'
+      + '</div>';
     });
-    favExisting.innerHTML=h;
-    favExisting.querySelectorAll('.fav-tag').forEach(function(tag){
-      tag.addEventListener('click',function(){
-        favInput.value=this.getAttribute('data-n');
-        favInput.focus();
+    favExisting.innerHTML = h;
+
+    favExisting.querySelectorAll('.fav-pl-card').forEach(function(card){
+      card.addEventListener('click', function(){
+        var targetPl = this.getAttribute('data-pl');
+        saveSongToPlaylist(targetPl);
       });
     });
-  } else {
-    favExisting.innerHTML='';
   }
+
   favModal.classList.add('visible');
-  setTimeout(function(){favInput.focus();},200);
+  setTimeout(function(){ favInput.focus(); }, 250);
 }
 
-starBtn.addEventListener('click',function(e){
-  e.stopPropagation();unlocked=true;
-  openFavModal();
-});
+function saveSongToPlaylist(plName){
+  plName = (plName || '').trim();
+  if(!plName) return;
 
-favCancel.addEventListener('click',function(e){
-  e.stopPropagation();
-  favModal.classList.remove('visible');
-});
-
-favConfirm.addEventListener('click',function(e){
-  e.stopPropagation();
-  var plName=(favInput.value||'').trim();
-  if(!plName){favInput.focus();favInput.style.borderColor='#ef4444';return;}
-  favInput.style.borderColor='';
-
-  // ── Guardar nombre de playlist ──
+  // Registrar playlist si es nueva (SIN LÍMITES)
   if(!savedFavPlaylists.includes(plName)){
-    savedFavPlaylists.unshift(plName);
-    if(savedFavPlaylists.length>10)savedFavPlaylists.pop();
-    try{localStorage.setItem('ghost1d_playlists',JSON.stringify(savedFavPlaylists));}catch(e){}
+    savedFavPlaylists.push(plName);
+    try{ localStorage.setItem('ghost1d_playlists', JSON.stringify(savedFavPlaylists)); }catch(e){}
   }
 
-  // ── Guardar la canción dentro de la playlist en localStorage ──
-  var song = {t: titleStr, a: artistStr};
+  // Guardar la canción
+  var song = {
+    t: titleStr,
+    a: artistStr,
+    audio: audioStr || (audio.src && audio.src.startsWith('http') ? audio.src : '')
+  };
   var plKey = 'ghost1d_pl_songs_' + plName;
   var existing = [];
-  try{ var ex=localStorage.getItem(plKey); if(ex) existing=JSON.parse(ex); }catch(e){}
-  // Evitar duplicados
-  var isDup = existing.some(function(s){return s.t===song.t && s.a===song.a;});
+  try{ var ex = localStorage.getItem(plKey); if(ex) existing = JSON.parse(ex); }catch(e){}
+
+  var isDup = existing.some(function(s){
+    return s.t && s.t.toLowerCase().trim() === song.t.toLowerCase().trim();
+  });
+
   if(!isDup){
-    existing.unshift(song);
-    try{localStorage.setItem(plKey, JSON.stringify(existing));}catch(e){}
+    existing.push(song);
+    try{ localStorage.setItem(plKey, JSON.stringify(existing)); }catch(e){}
+    showToast('⭐ Guardada en "' + plName + '"', '#38bdf8');
+  } else {
+    showToast('ℹ️ Ya estaba en "' + plName + '"', '#f59e0b');
   }
 
-  // ── Marcar estrella visualmente ──
-  starBtn.innerText='⭐'; starBtn.classList.add('fav');
+  updateStarIcon();
   favModal.classList.remove('visible');
+}
 
-  // ── Enviar al bot para persistencia en el servidor también ──
-  var data=JSON.stringify({action:'add_to_playlist',playlist:plName,title:titleStr,artist:artistStr});
-  try{ Telegram.WebApp.sendData(data); }catch(e){ console.log('sendData fallback:',e); }
+starBtn.addEventListener('click', function(e){
+  e.stopPropagation(); unlocked = true;
+  if(!titleStr || titleStr === "Selecciona una playlist o música"){
+    openMyPlaylistsView();
+  } else {
+    openFavModal();
+  }
+});
+
+favCancel.addEventListener('click', function(e){
+  e.stopPropagation();
+  favModal.classList.remove('visible');
+});
+
+favConfirm.addEventListener('click', function(e){
+  e.stopPropagation();
+  var plName = (favInput.value || '').trim();
+  if(!plName){
+    favInput.focus();
+    favInput.style.borderColor = '#ef4444';
+    return;
+  }
+  favInput.style.borderColor = '';
+  saveSongToPlaylist(plName);
 });
 
 // ── Panel: MIS PLAYLISTS ──────────────────────────────────────────────────
@@ -851,113 +1005,241 @@ var myPlaylistsBtn   = document.getElementById('myPlaylistsBtn');
 var closeMpBtn       = document.getElementById('closeMpBtn');
 var closeMpSongsBtn  = document.getElementById('closeMpSongsBtn');
 var mpBackBtn        = document.getElementById('mpBackBtn');
+var mpDeletePlBtn    = document.getElementById('mpDeletePlBtn');
+var mpCreateNewBtn   = document.getElementById('mpCreateNewBtn');
+var mpCreateRow      = document.getElementById('mpCreateRow');
+var mpNewPlInput     = document.getElementById('mpNewPlInput');
+var mpNewPlSave      = document.getElementById('mpNewPlSave');
+var mpNewPlCancel    = document.getElementById('mpNewPlCancel');
+var currentActivePlName = '';
+
+function openMyPlaylistsView(){
+  renderMyPlaylists();
+  mpListView.style.display = 'flex';
+  mpSongsView.style.display = 'none';
+  myPlaylistsPanel.style.display = 'flex';
+  myPlaylistsBtn.classList.add('active');
+}
 
 function renderMyPlaylists(){
   var pls = [];
-  try{ var s=localStorage.getItem('ghost1d_playlists'); if(s)pls=JSON.parse(s); }catch(e){}
+  try{ var s = localStorage.getItem('ghost1d_playlists'); if(s) pls = JSON.parse(s); }catch(e){}
+  savedFavPlaylists = pls;
+
+  if(mpCreateRow) mpCreateRow.style.display = 'none';
 
   if(!pls.length){
-    mpListScroll.innerHTML='<div style="text-align:center;padding:60px 20px;opacity:.45;font-size:14px;line-height:2;">'
-      +'⭐ Aún no tienes playlists.<br>Toca la ☆ en el reproductor<br>para guardar una canción.</div>';
+    mpListScroll.innerHTML = '<div style="text-align:center;padding:50px 20px;opacity:.5;font-size:14px;line-height:1.9;">'
+      + '⭐ Aún no tienes playlists creadas.<br>'
+      + 'Toca <b>+ Nueva Playlist</b> arriba para crear una<br>'
+      + 'o toca la ☆ en el reproductor al escuchar un tema.</div>';
     return;
   }
 
-  var h='<div style="height:8px"></div>';
+  var h = '<div style="height:8px"></div>';
   pls.forEach(function(name){
-    var plKey='ghost1d_pl_songs_'+name;
-    var songs=[];
-    try{ var ss=localStorage.getItem(plKey); if(ss)songs=JSON.parse(ss); }catch(e){}
-    h+='<div class="pl-item" data-pl="'+esc(name)+'" style="padding:15px 26px;">'
-      +'<div style="width:40px;height:40px;border-radius:10px;background:rgba(56,189,248,.15);'
-      +'border:1px solid rgba(56,189,248,.3);display:flex;align-items:center;justify-content:center;'
-      +'font-size:18px;flex-shrink:0;">⭐</div>'
-      +'<div class="pl-info">'
-        +'<div class="pl-title">'+esc(name)+'</div>'
-        +'<div class="pl-artist">'+songs.length+' canción'+(songs.length!==1?'es':'')+'</div>'
-      +'</div>'
-      +'<svg width="16" height="16" viewBox="0 0 24 24" fill="rgba(255,255,255,.3)"><path d="M8 5v14l11-7z"/></svg>'
-    +'</div>';
+    var plKey = 'ghost1d_pl_songs_' + name;
+    var songs = [];
+    try{ var ss = localStorage.getItem(plKey); if(ss) songs = JSON.parse(ss); }catch(e){}
+    h += '<div class="pl-item" data-pl="' + esc(name) + '" style="padding:14px 24px;display:flex;align-items:center;gap:14px;">'
+      + '<div style="width:42px;height:42px;border-radius:12px;background:rgba(56,189,248,.15);'
+      + 'border:1px solid rgba(56,189,248,.3);display:flex;align-items:center;justify-content:center;'
+      + 'font-size:19px;flex-shrink:0;">⭐</div>'
+      + '<div class="pl-info" style="flex:1;cursor:pointer;">'
+        + '<div class="pl-title" style="font-size:15px;font-weight:700;">' + esc(name) + '</div>'
+        + '<div class="pl-artist" style="font-size:12px;opacity:.55;">' + songs.length + ' canción' + (songs.length !== 1 ? 'es' : '') + '</div>'
+      + '</div>'
+      + '<button class="mp-quick-play" data-pl="' + esc(name) + '" title="Reproducir playlist" style="background:rgba(56,189,248,.2);border:1px solid rgba(56,189,248,.4);color:#38bdf8;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">'
+        + '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>'
+      + '</button>'
+    + '</div>';
   });
-  h+='<div style="height:30px"></div>';
-  mpListScroll.innerHTML=h;
+  h += '<div style="height:30px"></div>';
+  mpListScroll.innerHTML = h;
 
-  mpListScroll.querySelectorAll('.pl-item').forEach(function(el){
-    el.addEventListener('click',function(){
-      var plName=this.getAttribute('data-pl');
+  // Clic en la fila para abrir canciones
+  mpListScroll.querySelectorAll('.pl-item .pl-info').forEach(function(infoEl){
+    infoEl.addEventListener('click', function(e){
+      e.stopPropagation();
+      var plItem = this.closest('.pl-item');
+      var plName = plItem.getAttribute('data-pl');
       openMyPlaylistSongs(plName);
+    });
+  });
+
+  // Clic en botón rápido de reproducir ▶️
+  mpListScroll.querySelectorAll('.mp-quick-play').forEach(function(playBtnEl){
+    playBtnEl.addEventListener('click', function(e){
+      e.stopPropagation(); unlocked = true;
+      var plName = this.getAttribute('data-pl');
+      var plKey = 'ghost1d_pl_songs_' + plName;
+      var songs = [];
+      try{ var ss = localStorage.getItem(plKey); if(ss) songs = JSON.parse(ss); }catch(e){}
+      if(!songs.length){
+        showToast('⚠️ Playlist vacía', '#f59e0b');
+        openMyPlaylistSongs(plName);
+        return;
+      }
+      startPlayingPlaylist(songs, 0, plName);
     });
   });
 }
 
 function openMyPlaylistSongs(plName){
-  mpSongsTitle.innerText=plName;
-  var plKey='ghost1d_pl_songs_'+plName;
-  var songs=[];
-  try{ var ss=localStorage.getItem(plKey); if(ss)songs=JSON.parse(ss); }catch(e){}
+  currentActivePlName = plName;
+  mpSongsTitle.innerText = plName;
+  var plKey = 'ghost1d_pl_songs_' + plName;
+  var songs = [];
+  try{ var ss = localStorage.getItem(plKey); if(ss) songs = JSON.parse(ss); }catch(e){}
+
+  var playAllContainer = document.getElementById('mpPlayAllContainer');
+  if(songs.length > 0){
+    playAllContainer.innerHTML = '<button class="play-all-btn" id="mpPlayAllBtn">'
+      + '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>'
+      + 'Reproducir Todo (' + songs.length + ' canciones)'
+    + '</button>';
+    document.getElementById('mpPlayAllBtn').addEventListener('click', function(e){
+      e.stopPropagation(); unlocked = true;
+      startPlayingPlaylist(songs, 0, plName);
+    });
+  } else {
+    playAllContainer.innerHTML = '';
+  }
 
   if(!songs.length){
-    mpSongsScroll.innerHTML='<div style="text-align:center;padding:60px 20px;opacity:.4;font-size:14px;">Playlist vacía</div>';
+    mpSongsScroll.innerHTML = '<div style="text-align:center;padding:60px 20px;opacity:.45;font-size:14px;line-height:2;">'
+      + 'Esta playlist está vacía.<br>Guarda canciones usando la estrella ⭐ en el reproductor.</div>';
   } else {
-    var h='<div style="height:8px"></div>';
-    songs.forEach(function(s,i){
-      h+='<div class="pl-item" data-i="'+i+'" data-t="'+esc(s.t)+'" data-a="'+esc(s.a)+'">'
-        +'<span class="pl-num">'+(i+1)+'</span>'
-        +'<div class="pl-info">'
-          +'<div class="pl-title">'+esc(s.t)+'</div>'
-          +'<div class="pl-artist">'+esc(s.a)+'</div>'
-        +'</div>'
-        +'<svg width="16" height="16" viewBox="0 0 24 24" fill="rgba(255,255,255,.3)"><path d="M8 5v14l11-7z"/></svg>'
-      +'</div>';
+    var h = '<div style="height:4px"></div>';
+    songs.forEach(function(s, i){
+      h += '<div class="pl-item" data-i="' + i + '" style="padding:12px 24px;display:flex;align-items:center;">'
+        + '<span class="pl-num">' + (i + 1) + '</span>'
+        + '<div class="pl-info" style="flex:1;">'
+          + '<div class="pl-title">' + esc(s.t) + '</div>'
+          + '<div class="pl-artist">' + esc(s.a) + '</div>'
+        + '</div>'
+        + '<button class="mp-del-song" data-i="' + i + '" title="Quitar de playlist" style="background:none;border:none;color:rgba(255,255,255,.35);font-size:15px;cursor:pointer;padding:6px 8px;border-radius:6px;">✕</button>'
+      + '</div>';
     });
-    h+='<div style="height:30px"></div>';
-    mpSongsScroll.innerHTML=h;
+    h += '<div style="height:30px"></div>';
+    mpSongsScroll.innerHTML = h;
 
+    // Clic en canción -> reproducir desde ese punto en orden continuo
     mpSongsScroll.querySelectorAll('.pl-item').forEach(function(el){
-      el.addEventListener('click',function(){
-        var t=this.getAttribute('data-t');
-        var a=this.getAttribute('data-a');
-        var wasPlaying=!audio.paused;
-        applyTrack(t, a, '');
-        // Cerrar panel y reproducir
-        myPlaylistsPanel.style.display='none';
-        myPlaylistsBtn.classList.remove('active');
-        if(wasPlaying){
-          setTimeout(function(){
-            audio.play().then(function(){setPlaying(true);}).catch(function(){});
-          },600);
-        }
+      el.addEventListener('click', function(e){
+        if(e.target.classList.contains('mp-del-song')) return;
+        var i = parseInt(this.getAttribute('data-i'));
+        unlocked = true;
+        startPlayingPlaylist(songs, i, plName);
+      });
+    });
+
+    // Eliminar canción individual
+    mpSongsScroll.querySelectorAll('.mp-del-song').forEach(function(btn){
+      btn.addEventListener('click', function(e){
+        e.stopPropagation();
+        var i = parseInt(this.getAttribute('data-i'));
+        songs.splice(i, 1);
+        try{ localStorage.setItem(plKey, JSON.stringify(songs)); }catch(e){}
+        showToast('🗑️ Canción quitada', '#f59e0b');
+        openMyPlaylistSongs(plName);
+        updateStarIcon();
       });
     });
   }
 
-  mpListView.style.display='none';
-  mpSongsView.style.display='flex';
+  mpListView.style.display = 'none';
+  mpSongsView.style.display = 'flex';
 }
 
-myPlaylistsBtn.addEventListener('click',function(e){
-  e.stopPropagation(); unlocked=true;
-  renderMyPlaylists();
-  mpListView.style.display='flex';
-  mpSongsView.style.display='none';
-  myPlaylistsPanel.style.display='flex';
-  myPlaylistsBtn.classList.add('active');
-});
-closeMpBtn.addEventListener('click',function(e){
-  e.stopPropagation();
-  myPlaylistsPanel.style.display='none';
-  myPlaylistsBtn.classList.remove('active');
-});
-closeMpSongsBtn.addEventListener('click',function(e){
-  e.stopPropagation();
-  myPlaylistsPanel.style.display='none';
-  myPlaylistsBtn.classList.remove('active');
-});
-mpBackBtn.addEventListener('click',function(e){
-  e.stopPropagation();
-  mpSongsView.style.display='none';
-  mpListView.style.display='flex';
-});
+function startPlayingPlaylist(songsList, startIndex, plName){
+  if(!songsList || !songsList.length) return;
+  playlist = songsList.slice();
+  playlistIdx = startIndex || 0;
 
+  // Cerrar el panel
+  myPlaylistsPanel.style.display = 'none';
+  myPlaylistsBtn.classList.remove('active');
+
+  // Actualizar título de la playlist activa
+  document.getElementById('plTitle').innerText = plName ? ('Playlist: ' + plName) : 'Mi Playlist';
+
+  showToast('▶️ Reproduciendo: ' + (plName || 'Playlist'), '#38bdf8');
+  navTo(playlistIdx, true);
+}
+
+// Botones de Nueva Playlist inline
+if(mpCreateNewBtn){
+  mpCreateNewBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    if(mpCreateRow){
+      mpCreateRow.style.display = 'block';
+      mpNewPlInput.value = '';
+      mpNewPlInput.focus();
+    }
+  });
+}
+if(mpNewPlCancel){
+  mpNewPlCancel.addEventListener('click', function(e){
+    e.stopPropagation();
+    if(mpCreateRow) mpCreateRow.style.display = 'none';
+  });
+}
+if(mpNewPlSave){
+  mpNewPlSave.addEventListener('click', function(e){
+    e.stopPropagation();
+    var name = (mpNewPlInput.value || '').trim();
+    if(!name){ mpNewPlInput.focus(); return; }
+    if(!savedFavPlaylists.includes(name)){
+      savedFavPlaylists.push(name);
+      try{ localStorage.setItem('ghost1d_playlists', JSON.stringify(savedFavPlaylists)); }catch(e){}
+      showToast('⭐ Playlist creada: ' + name, '#22c55e');
+    }
+    if(mpCreateRow) mpCreateRow.style.display = 'none';
+    renderMyPlaylists();
+  });
+}
+
+// Eliminar playlist entera
+if(mpDeletePlBtn){
+  mpDeletePlBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    if(!currentActivePlName) return;
+    if(confirm('¿Eliminar la playlist "' + currentActivePlName + '"?')){
+      var idx = savedFavPlaylists.indexOf(currentActivePlName);
+      if(idx !== -1) savedFavPlaylists.splice(idx, 1);
+      try{
+        localStorage.setItem('ghost1d_playlists', JSON.stringify(savedFavPlaylists));
+        localStorage.removeItem('ghost1d_pl_songs_' + currentActivePlName);
+      }catch(e){}
+      showToast('🗑️ Playlist eliminada', '#ef4444');
+      renderMyPlaylists();
+      mpSongsView.style.display = 'none';
+      mpListView.style.display = 'flex';
+      updateStarIcon();
+    }
+  });
+}
+
+myPlaylistsBtn.addEventListener('click', function(e){
+  e.stopPropagation(); unlocked = true;
+  openMyPlaylistsView();
+});
+closeMpBtn.addEventListener('click', function(e){
+  e.stopPropagation();
+  myPlaylistsPanel.style.display = 'none';
+  myPlaylistsBtn.classList.remove('active');
+});
+closeMpSongsBtn.addEventListener('click', function(e){
+  e.stopPropagation();
+  myPlaylistsPanel.style.display = 'none';
+  myPlaylistsBtn.classList.remove('active');
+});
+mpBackBtn.addEventListener('click', function(e){
+  e.stopPropagation();
+  mpSongsView.style.display = 'none';
+  mpListView.style.display = 'flex';
+});
 
 // ── Letras Sincronizadas ──────────────────────────────────────────────────
 var lyricsVisible=false,lyricsLoaded=false;
