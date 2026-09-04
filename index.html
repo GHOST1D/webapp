@@ -236,21 +236,31 @@ footer{display:flex;justify-content:space-between;align-items:center;padding:0 8
 
 <!-- ── PANEL LETRAS ── -->
 <div id="lyricsOverlay" class="overlay-panel">
-  <div class="panel-hdr">
-    <span class="panel-hdr-title">🎤 Letras sincronizadas</span>
+  <div class="panel-hdr" style="display:flex;align-items:center;justify-content:space-between;padding:16px 22px;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="panel-hdr-title">🎤 Letras</span>
+      <div id="lyricsCalib" style="display:none;align-items:center;gap:4px;background:rgba(255,255,255,.08);padding:3px 8px;border-radius:16px;border:1px solid rgba(255,255,255,.12);">
+        <button id="lrcDelayBtn" title="Retrasar letra (-0.5s)" style="background:none;border:none;color:#38bdf8;cursor:pointer;font-weight:700;padding:2px 6px;font-size:12px;">-0.5s</button>
+        <span id="lrcOffsetLabel" style="color:rgba(255,255,255,.75);min-width:32px;text-align:center;font-size:11px;font-weight:600;">0.0s</span>
+        <button id="lrcAdvanceBtn" title="Adelantar letra (+0.5s)" style="background:none;border:none;color:#38bdf8;cursor:pointer;font-weight:700;padding:2px 6px;font-size:12px;">+0.5s</button>
+      </div>
+    </div>
     <button class="panel-close" id="closeLyricsBtn">✕</button>
   </div>
   <div id="lyricsScroll"><div class="lyric-loading">Buscando letra...</div></div>
 </div>
 
-<!-- ── PANEL PLAYLIST (resultados búsqueda) ── -->
+<!-- ── PANEL PLAYLIST (Canciones del Chat) ── -->
 <div id="playlistPanel">
   <div style="padding:20px 26px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.08);">
     <div>
-      <div style="font-size:11px;opacity:.45;letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px;">Playlist</div>
-      <div style="font-size:16px;font-weight:700;" id="plTitle">Resultados de búsqueda</div>
+      <div style="font-size:11px;opacity:.45;letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px;">Chat Bot</div>
+      <div style="font-size:16px;font-weight:700;" id="plTitle">Canciones del Chat</div>
     </div>
-    <button class="panel-close" id="closePlBtn">✕</button>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button id="clearPlBtn" title="Limpiar lista" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);border-radius:10px;padding:4px 10px;font-size:11px;cursor:pointer;">Limpiar</button>
+      <button class="panel-close" id="closePlBtn">✕</button>
+    </div>
   </div>
   <div id="plScroll"></div>
 </div>
@@ -473,6 +483,74 @@ if(plP){
 }
 if(piP){
   try{ playlistIdx = parseInt(piP) || 0; }catch(e){}
+}
+
+// ── Historial de Canciones del Chat en LocalStorage ───────────────────────
+var chatHistorySongs = [];
+try {
+  var storedHistory = localStorage.getItem('ghost1d_chat_songs');
+  if(storedHistory) chatHistorySongs = JSON.parse(storedHistory);
+} catch(e){}
+
+function syncChatHistory(newItems, currentTrack){
+  var changed = false;
+  if(Array.isArray(newItems)){
+    newItems.forEach(function(item){
+      if(!item || !item.t) return;
+      var match = chatHistorySongs.find(function(s){
+        return s.t.toLowerCase().trim() === item.t.toLowerCase().trim();
+      });
+      if(match){
+        if(item.audio && item.audio !== match.audio){
+          match.audio = item.audio;
+          changed = true;
+        }
+      } else {
+        chatHistorySongs.push({ t: item.t, a: item.a || '', audio: item.audio || '' });
+        changed = true;
+      }
+    });
+  }
+  if(currentTrack && currentTrack.t && currentTrack.t !== "Selecciona una playlist o música"){
+    var curMatch = chatHistorySongs.find(function(s){
+      return s.t.toLowerCase().trim() === currentTrack.t.toLowerCase().trim();
+    });
+    if(curMatch){
+      if(currentTrack.audio && currentTrack.audio !== curMatch.audio){
+        curMatch.audio = currentTrack.audio;
+        changed = true;
+      }
+    } else {
+      chatHistorySongs.push({ t: currentTrack.t, a: currentTrack.a || '', audio: currentTrack.audio || '' });
+      changed = true;
+    }
+  }
+  if(changed){
+    try { localStorage.setItem('ghost1d_chat_songs', JSON.stringify(chatHistorySongs)); } catch(e){}
+  }
+}
+
+syncChatHistory(playlist, { t: titleStr, a: artistStr, audio: audioStr });
+
+// Si no vino lista en la URL pero hay canciones del chat previas, restaurarlas
+if(!playlist.length && chatHistorySongs.length > 0){
+  playlist = chatHistorySongs.slice();
+  if(titleStr){
+    var fIdx = playlist.findIndex(function(s){
+      return s.t.toLowerCase().trim() === titleStr.toLowerCase().trim();
+    });
+    if(fIdx !== -1) playlistIdx = fIdx;
+  }
+} else if(playlist.length > 0) {
+  // Asegurar que si alguna ya tenía audio en chatHistorySongs, se use su audio completo
+  playlist.forEach(function(item){
+    if(!item.audio){
+      var match = chatHistorySongs.find(function(s){
+        return s.t.toLowerCase().trim() === item.t.toLowerCase().trim() && s.audio;
+      });
+      if(match) item.audio = match.audio;
+    }
+  });
 }
 
 function esc(s){
@@ -829,8 +907,13 @@ function updatePlActive(){
   });
 }
 function renderPlaylist(){
+  var plTitle = document.getElementById('plTitle');
+  if(plTitle) plTitle.innerText = 'Canciones del Chat (' + playlist.length + ')';
+
   if(!playlist.length){
-    plScroll.innerHTML='<div style="text-align:center;padding:60px 20px;opacity:.4;font-size:14px;">Sin playlist disponible</div>';
+    plScroll.innerHTML='<div style="text-align:center;padding:60px 20px;opacity:.45;font-size:14px;line-height:1.8;">'
+      + 'No hay canciones del chat aún.<br>'
+      + 'Pide canciones al bot de Telegram y se enlistarán aquí con su audio completo 🎵</div>';
     return;
   }
   var h='<div style="height:6px"></div>';
@@ -843,6 +926,7 @@ function renderPlaylist(){
         +'<div class="pl-title">'+esc(item.t)+'</div>'
         +'<div class="pl-artist">'+esc(item.a)+'</div>'
       +'</div>'
+      +(item.audio ? '<span title="Audio completo disponible" style="font-size:11px;color:#22c55e;font-weight:700;margin-right:8px;background:rgba(34,197,94,.15);padding:2px 7px;border-radius:8px;">Full</span>' : '')
     +'</div>';
   });
   h+='<div style="height:30px"></div>';
@@ -863,6 +947,20 @@ function renderPlaylist(){
     var active=plScroll.querySelector('.pl-active');
     if(active)active.scrollIntoView({block:'center',behavior:'smooth'});
   },150);
+}
+
+var clearPlBtn = document.getElementById('clearPlBtn');
+if(clearPlBtn){
+  clearPlBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    if(confirm('¿Limpiar la lista de canciones del chat?')){
+      playlist = [];
+      chatHistorySongs = [];
+      try { localStorage.removeItem('ghost1d_chat_songs'); } catch(err){}
+      renderPlaylist();
+      showToast('🗑️ Lista del chat vaciada', '#ef4444');
+    }
+  });
 }
 
 playlistBtn.addEventListener('click',function(e){
@@ -1379,65 +1477,183 @@ mpBackBtn.addEventListener('click', function(e){
 });
 
 // ── Letras Sincronizadas ──────────────────────────────────────────────────
-var lyricsVisible=false,lyricsLoaded=false;
-var lrcLines=[],currentLineIndex=-1;
+var lyricsVisible = false, lyricsLoaded = false;
+var lrcLines = [], currentLineIndex = -1;
+var userLrcOffset = 0; // Ajuste manual del usuario en segundos (+/-)
+
 function parseLRC(txt){
-  var lines=[],re=/\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/;
+  var lines = [];
+  var fileOffset = 0;
+  var reOffset = /\[offset:\s*([+-]?\d+)\s*\]/i;
+  var reTime = /\[(\d{2}):(\d{2})(?:\.(\d{2,3}))?\](.*)/;
+
   txt.split('\n').forEach(function(l){
-    var m=l.match(re);
-    if(m){var s=parseInt(m[1])*60+parseInt(m[2])+parseInt(m[3])/1000;var t=m[4].trim();if(t)lines.push({time:s,text:t});}
-  });
-  return lines.sort(function(a,b){return a.time-b.time;});
-}
-function renderLyrics(){
-  if(!lrcLines.length){lyricsScroll.innerHTML='<div class="lyric-none">😔 Sin letra sincronizada.<br>Disfruta la música 🎵</div>';return;}
-  var h='<div style="height:50px"></div>';
-  lrcLines.forEach(function(l,i){h+='<div class="lyric-line" id="ll'+i+'">'+esc(l.text)+'</div>';});
-  h+='<div style="height:120px"></div>';
-  lyricsScroll.innerHTML=h;
-}
-function updateActiveLine(t){
-  if(!lrcLines.length)return;
-  var ni=-1;
-  for(var i=0;i<lrcLines.length;i++){if(lrcLines[i].time<=t)ni=i;else break;}
-  if(ni===currentLineIndex)return;
-  currentLineIndex=ni;
-  lyricsScroll.querySelectorAll('.lyric-line').forEach(function(el,i){
-    el.classList.remove('active','past');
-    if(i<currentLineIndex)el.classList.add('past');
-    else if(i===currentLineIndex)el.classList.add('active');
-  });
-  if(currentLineIndex>=0){var el=document.getElementById('ll'+currentLineIndex);if(el)lyricsScroll.scrollTo({top:el.offsetTop-(lyricsScroll.clientHeight/2)+(el.clientHeight/2),behavior:'smooth'});}
-}
-function fetchLyrics(){
-  if(lyricsLoaded)return;lyricsLoaded=true;
-  lyricsScroll.innerHTML='<div class="lyric-loading">🎤 Buscando letra...</div>';
-  fetch('https://lrclib.net/api/search?q='+encodeURIComponent(titleStr+' '+artistStr))
-    .then(function(r){return r.json();})
-    .then(function(data){
-      if(!data||!data.length){lyricsScroll.innerHTML='<div class="lyric-none">😔 Sin letra disponible</div>';return;}
-      var synced=null;
-      for(var i=0;i<data.length;i++){if(data[i].syncedLyrics){synced=data[i].syncedLyrics;break;}}
-      if(synced){lrcLines=parseLRC(synced);renderLyrics();updateActiveLine(audio.currentTime);}
-      else{
-        var plain=data[0].plainLyrics||'';
-        if(plain){
-          var h='<div style="height:30px"></div>';
-          plain.split('\n').forEach(function(l){h+=l.trim()?'<div class="lyric-line" style="color:rgba(255,255,255,.65)">'+esc(l)+'</div>':'<div style="height:10px"></div>';});
-          lyricsScroll.innerHTML=h;
-        }else lyricsScroll.innerHTML='<div class="lyric-none">😔 Sin letra disponible</div>';
+    l = l.trim();
+    var mOff = l.match(reOffset);
+    if(mOff){
+      fileOffset = (parseInt(mOff[1]) || 0) / 1000;
+      return;
+    }
+    var m = l.match(reTime);
+    if(m){
+      var min = parseInt(m[1]) || 0;
+      var sec = parseInt(m[2]) || 0;
+      var frac = 0;
+      if(m[3]){
+        // 2 dígitos = centésimas (/ 100), 3 dígitos = milisegundos (/ 1000)
+        frac = m[3].length === 2 ? (parseInt(m[3]) / 100) : (parseInt(m[3]) / 1000);
       }
-    }).catch(function(){lyricsScroll.innerHTML='<div class="lyric-none">⚠️ Error de conexión</div>';});
+      var s = min * 60 + sec + frac + fileOffset;
+      var t = m[4].trim();
+      if(t) lines.push({ time: Math.max(0, s), text: t });
+    }
+  });
+  return lines.sort(function(a, b){ return a.time - b.time; });
 }
-lyricsBtn.addEventListener('click',function(e){
-  e.stopPropagation();unlocked=true;
-  lyricsVisible=!lyricsVisible;
-  if(lyricsVisible){lyricsOverlay.classList.add('visible');lyricsBtn.classList.add('active');fetchLyrics();}
-  else{lyricsOverlay.classList.remove('visible');lyricsBtn.classList.remove('active');}
+
+function renderLyrics(){
+  var lyricsCalib = document.getElementById('lyricsCalib');
+  if(!lrcLines.length){
+    if(lyricsCalib) lyricsCalib.style.display = 'none';
+    lyricsScroll.innerHTML = '<div class="lyric-none">😔 Sin letra sincronizada.<br>Disfruta la música 🎵</div>';
+    return;
+  }
+  if(lyricsCalib) lyricsCalib.style.display = 'inline-flex';
+  var h = '<div style="height:50px"></div>';
+  lrcLines.forEach(function(l, i){
+    h += '<div class="lyric-line" id="ll' + i + '">' + esc(l.text) + '</div>';
+  });
+  h += '<div style="height:120px"></div>';
+  lyricsScroll.innerHTML = h;
+}
+
+function updateActiveLine(t){
+  if(!lrcLines.length) return;
+  var effectiveTime = t + userLrcOffset;
+  var ni = -1;
+  for(var i = 0; i < lrcLines.length; i++){
+    if(lrcLines[i].time <= effectiveTime) ni = i;
+    else break;
+  }
+  if(ni === currentLineIndex) return;
+  currentLineIndex = ni;
+  lyricsScroll.querySelectorAll('.lyric-line').forEach(function(el, i){
+    el.classList.remove('active', 'past');
+    if(i < currentLineIndex) el.classList.add('past');
+    else if(i === currentLineIndex) el.classList.add('active');
+  });
+  if(currentLineIndex >= 0){
+    var el = document.getElementById('ll' + currentLineIndex);
+    if(el){
+      var targetTop = el.offsetTop - (lyricsScroll.clientHeight / 2) + (el.clientHeight / 2);
+      lyricsScroll.scrollTo({ top: targetTop, behavior: 'smooth' });
+    }
+  }
+}
+
+function fetchLyrics(){
+  if(lyricsLoaded) return;
+  lyricsLoaded = true;
+  userLrcOffset = 0;
+  var lrcOffsetLabel = document.getElementById('lrcOffsetLabel');
+  if(lrcOffsetLabel) lrcOffsetLabel.innerText = '0.0s';
+  lyricsScroll.innerHTML = '<div class="lyric-loading">🎤 Buscando letra...</div>';
+
+  var cleanQ = (titleStr + ' ' + artistStr).replace(/\.(mp3|m4a|flac|wav)$/i, '').trim();
+  fetch('https://lrclib.net/api/search?q=' + encodeURIComponent(cleanQ))
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if(!data || !data.length){
+        lyricsScroll.innerHTML = '<div class="lyric-none">😔 Sin letra disponible</div>';
+        return;
+      }
+      var candidates = data.filter(function(item){ return !!item.syncedLyrics; });
+      var synced = null;
+
+      if(candidates.length > 0){
+        var audioDur = (audio.duration && !isNaN(audio.duration) && audio.duration > 20) ? audio.duration : 0;
+        var tLow = cleanQ.toLowerCase();
+
+        // Ordenar candidatos dando prioridad a duraciones que coincidan y descartando versiones de video/en vivo
+        candidates.sort(function(a, b){
+          var scoreA = 0, scoreB = 0;
+          var aName = (a.trackName || '').toLowerCase();
+          var bName = (b.trackName || '').toLowerCase();
+
+          var penaltyA = /(video oficial|live|en vivo|remix|acustico|karaoke|homenaje)/i.test(aName);
+          var penaltyB = /(video oficial|live|en vivo|remix|acustico|karaoke|homenaje)/i.test(bName);
+          if(penaltyA && !tLow.includes('video') && !tLow.includes('live')) scoreA += 40;
+          if(penaltyB && !tLow.includes('video') && !tLow.includes('live')) scoreB += 40;
+
+          if(audioDur > 0){
+            var diffA = Math.abs((a.duration || 0) - audioDur);
+            var diffB = Math.abs((b.duration || 0) - audioDur);
+            scoreA += diffA;
+            scoreB += diffB;
+          }
+          return scoreA - scoreB;
+        });
+
+        synced = candidates[0].syncedLyrics;
+      }
+
+      if(synced){
+        lrcLines = parseLRC(synced);
+        renderLyrics();
+        updateActiveLine(audio.currentTime);
+      } else {
+        var plain = data[0].plainLyrics || '';
+        if(plain){
+          var lyricsCalib = document.getElementById('lyricsCalib');
+          if(lyricsCalib) lyricsCalib.style.display = 'none';
+          var h = '<div style="height:30px"></div>';
+          plain.split('\n').forEach(function(l){
+            h += l.trim() ? '<div class="lyric-line" style="color:rgba(255,255,255,.65)">' + esc(l) + '</div>' : '<div style="height:10px"></div>';
+          });
+          lyricsScroll.innerHTML = h;
+        } else {
+          lyricsScroll.innerHTML = '<div class="lyric-none">😔 Sin letra disponible</div>';
+        }
+      }
+    })
+    .catch(function(){
+      lyricsScroll.innerHTML = '<div class="lyric-none">⚠️ Error de conexión</div>';
+    });
+}
+
+// Botones de calibración manual
+var lrcDelayBtn = document.getElementById('lrcDelayBtn');
+var lrcAdvanceBtn = document.getElementById('lrcAdvanceBtn');
+var lrcOffsetLabel = document.getElementById('lrcOffsetLabel');
+
+if(lrcDelayBtn){
+  lrcDelayBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    userLrcOffset -= 0.5;
+    if(lrcOffsetLabel) lrcOffsetLabel.innerText = (userLrcOffset > 0 ? '+' : '') + userLrcOffset.toFixed(1) + 's';
+    updateActiveLine(audio.currentTime);
+    showToast('⏱️ Letra: ' + (userLrcOffset > 0 ? '+' : '') + userLrcOffset.toFixed(1) + 's', '#38bdf8');
+  });
+}
+if(lrcAdvanceBtn){
+  lrcAdvanceBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    userLrcOffset += 0.5;
+    if(lrcOffsetLabel) lrcOffsetLabel.innerText = (userLrcOffset > 0 ? '+' : '') + userLrcOffset.toFixed(1) + 's';
+    updateActiveLine(audio.currentTime);
+    showToast('⏱️ Letra: ' + (userLrcOffset > 0 ? '+' : '') + userLrcOffset.toFixed(1) + 's', '#38bdf8');
+  });
+}
+
+lyricsBtn.addEventListener('click', function(e){
+  e.stopPropagation(); unlocked = true;
+  lyricsVisible = !lyricsVisible;
+  if(lyricsVisible){ lyricsOverlay.classList.add('visible'); lyricsBtn.classList.add('active'); fetchLyrics(); }
+  else { lyricsOverlay.classList.remove('visible'); lyricsBtn.classList.remove('active'); }
 });
-closeLyricsBtn.addEventListener('click',function(e){
-  e.stopPropagation();lyricsVisible=false;
-  lyricsOverlay.classList.remove('visible');lyricsBtn.classList.remove('active');
+closeLyricsBtn.addEventListener('click', function(e){
+  e.stopPropagation(); lyricsVisible = false;
+  lyricsOverlay.classList.remove('visible'); lyricsBtn.classList.remove('active');
 });
 </script>
 </body>
