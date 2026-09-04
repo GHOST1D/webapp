@@ -499,7 +499,7 @@ function setPlaying(p){
 // ── Media Session API — Controles en pantalla bloqueada ───────────────────
 var currentCoverUrl = '';
 function updateMediaSession(){
-  if(!('mediaSession' in navigator)) return;
+  if(!('mediaSession' in navigator) || !navigator.mediaSession) return;
   try {
     navigator.mediaSession.metadata = new MediaMetadata({
       title:  titleStr  || 'GHOST1D Player',
@@ -513,36 +513,38 @@ function updateMediaSession(){
   } catch(e){}
 }
 function setupMediaSessionHandlers(){
-  if(!('mediaSession' in navigator)) return;
-  navigator.mediaSession.setActionHandler('play', function(){
-    audio.play().then(function(){setPlaying(true);}).catch(function(){});
-  });
-  navigator.mediaSession.setActionHandler('pause', function(){
-    audio.pause(); setPlaying(false);
-  });
-  navigator.mediaSession.setActionHandler('previoustrack', function(){
-    navTo(playlistIdx - 1);
-  });
-  navigator.mediaSession.setActionHandler('nexttrack', function(){
-    navTo(playlistIdx + 1);
-  });
-  navigator.mediaSession.setActionHandler('seekto', function(details){
-    if(audio.duration && details.seekTime != null){
-      audio.currentTime = details.seekTime;
+  if(!('mediaSession' in navigator) || !navigator.mediaSession) return;
+  try {
+    navigator.mediaSession.setActionHandler('play', function(){
+      audio.play().then(function(){setPlaying(true);}).catch(function(){});
+    });
+    navigator.mediaSession.setActionHandler('pause', function(){
+      audio.pause(); setPlaying(false);
+    });
+    navigator.mediaSession.setActionHandler('previoustrack', function(){
+      navTo(playlistIdx - 1);
+    });
+    navigator.mediaSession.setActionHandler('nexttrack', function(){
+      navTo(playlistIdx + 1);
+    });
+    navigator.mediaSession.setActionHandler('seekto', function(details){
+      if(audio.duration && details.seekTime != null){
+        audio.currentTime = details.seekTime;
+        updatePositionState();
+      }
+    });
+    navigator.mediaSession.setActionHandler('seekbackward', function(details){
+      audio.currentTime = Math.max(0, audio.currentTime - (details.seekOffset||10));
       updatePositionState();
-    }
-  });
-  navigator.mediaSession.setActionHandler('seekbackward', function(details){
-    audio.currentTime = Math.max(0, audio.currentTime - (details.seekOffset||10));
-    updatePositionState();
-  });
-  navigator.mediaSession.setActionHandler('seekforward', function(details){
-    audio.currentTime = Math.min(audio.duration||0, audio.currentTime + (details.seekOffset||10));
-    updatePositionState();
-  });
+    });
+    navigator.mediaSession.setActionHandler('seekforward', function(details){
+      audio.currentTime = Math.min(audio.duration||0, audio.currentTime + (details.seekOffset||10));
+      updatePositionState();
+    });
+  } catch(e){}
 }
 function updatePositionState(){
-  if(!('mediaSession' in navigator)) return;
+  if(!('mediaSession' in navigator) || !navigator.mediaSession) return;
   if(!audio.duration || isNaN(audio.duration)) return;
   try {
     navigator.mediaSession.setPositionState({
@@ -890,17 +892,17 @@ function openFavModal(){
     if(favModalTitle) favModalTitle.innerText = "⭐ Crear tu primera Playlist";
     if(favExistingSection) favExistingSection.style.display = 'none';
     if(favInputLabel) favInputLabel.innerText = "Nombre de tu primera playlist:";
-    favConfirm.innerText = "Crear Playlist y Guardar ⭐";
+    favConfirm.innerText = "Crear Playlist e Incluir Canción ⭐";
     favInput.placeholder = "Ej: Mis Favoritas, Fiesta, Rock...";
   } else {
     // Caso: Ya existen playlists
-    if(favModalTitle) favModalTitle.innerText = "⭐ Guardar en Playlist";
+    if(favModalTitle) favModalTitle.innerText = "⭐ Incluir en una Playlist";
     if(favExistingSection) favExistingSection.style.display = 'block';
-    if(favInputLabel) favInputLabel.innerText = "+ O crea una nueva playlist (sin límites):";
-    favConfirm.innerText = "Crear y Guardar ⭐";
+    if(favInputLabel) favInputLabel.innerText = "+ O crea una nueva playlist e incluye esta canción:";
+    favConfirm.innerText = "Crear Playlist e Incluir Canción ⭐";
     favInput.placeholder = "Nombre de la nueva playlist...";
 
-    // Renderizar playlists existentes como tarjetas seleccionables
+    // Renderizar playlists existentes con botones claros e inequívocos
     var h = '';
     savedFavPlaylists.forEach(function(plName){
       var plKey = 'ghost1d_pl_songs_' + plName;
@@ -909,19 +911,24 @@ function openFavModal(){
       var alreadyIn = songs.some(function(s){
         return s.t && s.t.toLowerCase().trim() === (titleStr||'').toLowerCase().trim();
       });
-      h += '<div class="fav-pl-card" data-pl="' + esc(plName) + '">'
-        + '<span style="font-size:18px;">' + (alreadyIn ? '✅' : '⭐') + '</span>'
-        + '<div style="flex:1;overflow:hidden;">'
-          + '<div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(plName) + '</div>'
-          + '<div style="font-size:11px;opacity:.5;">' + songs.length + ' canción' + (songs.length !== 1 ? 'es' : '') + (alreadyIn ? ' • Ya agregada' : '') + '</div>'
+      h += '<div class="fav-pl-card" data-pl="' + esc(plName) + '" style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(255,255,255,.08);border:1px solid ' + (alreadyIn ? 'rgba(34,197,94,.4)' : 'rgba(56,189,248,.3)') + ';border-radius:14px;cursor:pointer;margin-bottom:8px;">'
+        + '<div style="display:flex;align-items:center;gap:12px;overflow:hidden;">'
+          + '<span style="font-size:20px;">' + (alreadyIn ? '✅' : '⭐') + '</span>'
+          + '<div style="overflow:hidden;">'
+            + '<div style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(plName) + '</div>'
+            + '<div style="font-size:11px;opacity:.55;">' + songs.length + ' canción' + (songs.length !== 1 ? 'es' : '') + (alreadyIn ? ' • Ya incluida' : '') + '</div>'
+          + '</div>'
         + '</div>'
-        + '<span style="font-size:12px;color:#38bdf8;font-weight:600;">' + (alreadyIn ? 'Guardar +' : 'Guardar +') + '</span>'
+        + '<button class="fav-card-btn" data-pl="' + esc(plName) + '" style="background:' + (alreadyIn ? 'rgba(255,255,255,.12)' : '#38bdf8') + ';color:' + (alreadyIn ? 'rgba(255,255,255,.7)' : '#000') + ';border:none;border-radius:10px;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer;flex-shrink:0;">'
+          + (alreadyIn ? 'Incluida' : '➕ Incluir aquí')
+        + '</button>'
       + '</div>';
     });
     favExisting.innerHTML = h;
 
     favExisting.querySelectorAll('.fav-pl-card').forEach(function(card){
-      card.addEventListener('click', function(){
+      card.addEventListener('click', function(e){
+        e.stopPropagation();
         var targetPl = this.getAttribute('data-pl');
         saveSongToPlaylist(targetPl);
       });
@@ -932,7 +939,7 @@ function openFavModal(){
   setTimeout(function(){ favInput.focus(); }, 250);
 }
 
-function saveSongToPlaylist(plName){
+function saveSongToPlaylist(plName, songObj){
   plName = (plName || '').trim();
   if(!plName) return;
 
@@ -942,12 +949,18 @@ function saveSongToPlaylist(plName){
     try{ localStorage.setItem('ghost1d_playlists', JSON.stringify(savedFavPlaylists)); }catch(e){}
   }
 
-  // Guardar la canción
-  var song = {
-    t: titleStr,
-    a: artistStr,
-    audio: audioStr || (audio.src && audio.src.startsWith('http') ? audio.src : '')
-  };
+  // Obtener canción a guardar
+  var sTitle = songObj ? songObj.t : titleStr;
+  var sArtist = songObj ? songObj.a : artistStr;
+  var sAudio = songObj ? (songObj.audio || '') : (audioStr || (audio.src && audio.src.startsWith('http') ? audio.src : ''));
+
+  if(!sTitle || sTitle === "Selecciona una playlist o música"){
+    showToast('⚠️ No hay canción seleccionada para guardar', '#f59e0b');
+    favModal.classList.remove('visible');
+    return;
+  }
+
+  var song = { t: sTitle, a: sArtist, audio: sAudio };
   var plKey = 'ghost1d_pl_songs_' + plName;
   var existing = [];
   try{ var ex = localStorage.getItem(plKey); if(ex) existing = JSON.parse(ex); }catch(e){}
@@ -959,7 +972,7 @@ function saveSongToPlaylist(plName){
   if(!isDup){
     existing.push(song);
     try{ localStorage.setItem(plKey, JSON.stringify(existing)); }catch(e){}
-    showToast('⭐ Guardada en "' + plName + '"', '#38bdf8');
+    showToast('⭐ "' + song.t + '" incluida en "' + plName + '"', '#22c55e');
   } else {
     showToast('ℹ️ Ya estaba en "' + plName + '"', '#f59e0b');
   }
@@ -992,6 +1005,13 @@ favConfirm.addEventListener('click', function(e){
   }
   favInput.style.borderColor = '';
   saveSongToPlaylist(plName);
+});
+
+favInput.addEventListener('keydown', function(e){
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    favConfirm.click();
+  }
 });
 
 // ── Panel: MIS PLAYLISTS ──────────────────────────────────────────────────
@@ -1093,22 +1113,112 @@ function openMyPlaylistSongs(plName){
   try{ var ss = localStorage.getItem(plKey); if(ss) songs = JSON.parse(ss); }catch(e){}
 
   var playAllContainer = document.getElementById('mpPlayAllContainer');
+  var hHeader = '';
+
+  // 1. Botón Reproducir Todo si la playlist tiene canciones
   if(songs.length > 0){
-    playAllContainer.innerHTML = '<button class="play-all-btn" id="mpPlayAllBtn">'
+    hHeader += '<button class="play-all-btn" id="mpPlayAllBtn" style="margin-bottom:12px;">'
       + '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>'
       + 'Reproducir Todo (' + songs.length + ' canciones)'
     + '</button>';
-    document.getElementById('mpPlayAllBtn').addEventListener('click', function(e){
+  }
+
+  // 2. Botón para INCLUIR la canción actual en esta playlist
+  if(titleStr && titleStr !== "Selecciona una playlist o música"){
+    var alreadyIn = songs.some(function(s){
+      return s.t && s.t.toLowerCase().trim() === titleStr.toLowerCase().trim();
+    });
+    if(!alreadyIn){
+      hHeader += '<button id="mpAddCurrentBtn" style="width:100%;padding:13px 16px;border-radius:14px;'
+        + 'background:rgba(56,189,248,.18);border:1px solid rgba(56,189,248,.55);color:#38bdf8;'
+        + 'font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;margin-bottom:12px;'
+        + 'box-shadow:0 2px 10px rgba(56,189,248,.2);">'
+        + '➕ Incluir canción actual: "' + esc(titleStr) + '"'
+      + '</button>';
+    } else {
+      hHeader += '<div style="font-size:12px;color:#22c55e;padding:6px 0 10px;text-align:center;font-weight:600;">'
+        + '✅ Canción actual ("' + esc(titleStr) + '") ya está incluida aquí'
+      + '</div>';
+    }
+  }
+
+  // 3. Canciones de la búsqueda disponibles para agregar rápidamente
+  var availableToAdd = [];
+  if(playlist && playlist.length > 0){
+    availableToAdd = playlist.filter(function(pItem){
+      return !songs.some(function(s){
+        return s.t && s.t.toLowerCase().trim() === pItem.t.toLowerCase().trim();
+      });
+    });
+    if(availableToAdd.length > 0){
+      hHeader += '<div style="margin-bottom:12px;">'
+        + '<div style="font-size:11px;opacity:.55;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">Agregar canciones de tu búsqueda:</div>'
+        + '<div style="display:flex;flex-direction:column;gap:5px;max-height:130px;overflow-y:auto;scrollbar-width:none;">';
+      availableToAdd.forEach(function(item, aIdx){
+        hHeader += '<div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.06);padding:8px 12px;border-radius:10px;">'
+          + '<div style="overflow:hidden;flex:1;margin-right:8px;">'
+            + '<div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(item.t) + '</div>'
+            + '<div style="font-size:11px;opacity:.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + esc(item.a) + '</div>'
+          + '</div>'
+          + '<button class="mp-quick-add" data-qidx="' + aIdx + '" style="background:#38bdf8;color:#000;border:none;border-radius:8px;padding:5px 12px;font-weight:700;font-size:12px;cursor:pointer;flex-shrink:0;">'
+            + '➕ Incluir'
+          + '</button>'
+        + '</div>';
+      });
+      hHeader += '</div></div>';
+    }
+  }
+
+  playAllContainer.innerHTML = hHeader;
+
+  // Evento Reproducir Todo
+  var playAllBtn = document.getElementById('mpPlayAllBtn');
+  if(playAllBtn){
+    playAllBtn.addEventListener('click', function(e){
       e.stopPropagation(); unlocked = true;
       startPlayingPlaylist(songs, 0, plName);
     });
-  } else {
-    playAllContainer.innerHTML = '';
   }
 
+  // Evento Incluir Canción Actual
+  var addCurrentBtn = document.getElementById('mpAddCurrentBtn');
+  if(addCurrentBtn){
+    addCurrentBtn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var song = {
+        t: titleStr,
+        a: artistStr,
+        audio: audioStr || (audio.src && audio.src.startsWith('http') ? audio.src : '')
+      };
+      songs.unshift(song);
+      try{ localStorage.setItem(plKey, JSON.stringify(songs)); }catch(e){}
+      showToast('⭐ "' + titleStr + '" incluida en "' + plName + '"', '#22c55e');
+      updateStarIcon();
+      openMyPlaylistSongs(plName);
+    });
+  }
+
+  // Evento Incluir desde Búsqueda
+  playAllContainer.querySelectorAll('.mp-quick-add').forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var qIdx = parseInt(this.getAttribute('data-qidx'));
+      var item = availableToAdd[qIdx];
+      if(!item) return;
+      var song = { t: item.t, a: item.a, audio: item.audio || '' };
+      songs.push(song);
+      try{ localStorage.setItem(plKey, JSON.stringify(songs)); }catch(e){}
+      showToast('⭐ "' + item.t + '" incluida en "' + plName + '"', '#22c55e');
+      updateStarIcon();
+      openMyPlaylistSongs(plName);
+    });
+  });
+
   if(!songs.length){
-    mpSongsScroll.innerHTML = '<div style="text-align:center;padding:60px 20px;opacity:.45;font-size:14px;line-height:2;">'
-      + 'Esta playlist está vacía.<br>Guarda canciones usando la estrella ⭐ en el reproductor.</div>';
+    mpSongsScroll.innerHTML = '<div style="text-align:center;padding:40px 20px;opacity:.55;font-size:14px;line-height:1.9;">'
+      + 'Esta playlist está vacía.<br>'
+      + 'Toca el botón <b>➕ Incluir canción actual</b> arriba<br>'
+      + 'o toca la estrella ⭐ en el reproductor.</div>';
   } else {
     var h = '<div style="height:4px"></div>';
     songs.forEach(function(s, i){
@@ -1193,10 +1303,37 @@ if(mpNewPlSave){
     if(!savedFavPlaylists.includes(name)){
       savedFavPlaylists.push(name);
       try{ localStorage.setItem('ghost1d_playlists', JSON.stringify(savedFavPlaylists)); }catch(e){}
-      showToast('⭐ Playlist creada: ' + name, '#22c55e');
     }
+    // Si hay una canción cargada en el reproductor, incluirla automáticamente en la nueva playlist
+    var addedMsg = '';
+    if(titleStr && titleStr !== "Selecciona una playlist o música"){
+      var song = {
+        t: titleStr,
+        a: artistStr,
+        audio: audioStr || (audio.src && audio.src.startsWith('http') ? audio.src : '')
+      };
+      var plKey = 'ghost1d_pl_songs_' + name;
+      var existing = [];
+      try{ var ex = localStorage.getItem(plKey); if(ex) existing = JSON.parse(ex); }catch(e){}
+      if(!existing.some(function(s){ return s.t.toLowerCase().trim() === song.t.toLowerCase().trim(); })){
+        existing.push(song);
+        try{ localStorage.setItem(plKey, JSON.stringify(existing)); }catch(e){}
+        addedMsg = ' e incluye "' + titleStr + '"';
+      }
+    }
+    showToast('⭐ Playlist "' + name + '" creada' + addedMsg, '#22c55e');
     if(mpCreateRow) mpCreateRow.style.display = 'none';
+    updateStarIcon();
     renderMyPlaylists();
+    openMyPlaylistSongs(name); // Abre de inmediato la playlist para que el usuario la vea
+  });
+}
+if(mpNewPlInput){
+  mpNewPlInput.addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      mpNewPlSave.click();
+    }
   });
 }
 
